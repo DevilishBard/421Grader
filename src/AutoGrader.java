@@ -63,7 +63,7 @@ public class AutoGrader
 		System.out.println("Sentence Count: " + SentenceDetect(text));
 		String tokens[] = Tokenize(text);
 		
-		File dir = new File("spellchecker/spellchecker");
+		File dir = new File("spellchecker/");
 		Directory directory = FSDirectory.open(dir);
 
 		SpellChecker spellChecker = new SpellChecker(directory);
