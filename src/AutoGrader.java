@@ -60,28 +60,27 @@ public class AutoGrader
 	        text = sb.toString();
 	    }
 		
-		//System.out.println(text);
-		
-		//String paragraph = "How are you? This is Mike. Blah blah blah.";
 		System.out.println("Sentence Count: " + SentenceDetect(text));
 		String tokens[] = Tokenize(text);
 		
-		File dir = new File("spellchecker/");
+		File dir = new File("spellchecker/spellchecker");
 		Directory directory = FSDirectory.open(dir);
 
 		SpellChecker spellChecker = new SpellChecker(directory);
 
-		spellChecker.indexDictionary(new PlainTextDictionary(new File("421Grader/fulldictionary00.txt")));
+		spellChecker.indexDictionary(new PlainTextDictionary(new File("421Grader/dictionary3.txt")));
 		
+
 		int spellErrors = 0;
 		for(int i = 0; i<tokens.length; i++)
 		{
-			//TODO Why does the spellchecker not work right!!!!!!!!
-			if(!(spellChecker.exist(tokens[i].toLowerCase())))
-			{
-				System.out.println("Couldn't find " + tokens[i]);
-				spellErrors++;
-			}
+			//TODO Fix for two letter words, clitics, and punctuation
+			if(tokens[i].length()>=3)
+				if(!(spellChecker.exist(tokens[i].toLowerCase())))
+				{
+					System.out.println("Couldn't find " + tokens[i]);
+					spellErrors++;
+				}
 		}
 		
 		
