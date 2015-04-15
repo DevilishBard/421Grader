@@ -1,5 +1,7 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -21,8 +23,6 @@ public class AutoGrader
 	
 	public static int SentenceDetect(String paragraph) throws InvalidFormatException, IOException 
 	{
-		
-		// always start with a model, a model is learned from training data
 		InputStream is = new FileInputStream("en-sent.bin");
 		SentenceModel model = new SentenceModel(is);
 		SentenceDetectorME sdetector = new SentenceDetectorME(model);
@@ -30,16 +30,13 @@ public class AutoGrader
 		String sentences[] = sdetector.sentDetect(paragraph);
 		is.close();
 		return sentences.length;
-		
 	}
 	
-	public static String[] Tokenize(String paragraph) throws InvalidFormatException, IOException {
+	public static String[] Tokenize(String paragraph) throws InvalidFormatException, IOException 
+	{	
 		InputStream is = new FileInputStream("en-token.bin");
-	 
 		TokenizerModel model = new TokenizerModel(is);
-	 
 		Tokenizer tokenizer = new TokenizerME(model);
-	 
 		String tokens[] = tokenizer.tokenize(paragraph);
 	 
 		is.close();
@@ -48,11 +45,28 @@ public class AutoGrader
 	
 	public static void main(String[] args) throws Exception
 	{
-		String paragraph = "How are you? This is Mike. Blah blah blah.";
-		System.out.println("Sentence Count: " + SentenceDetect(paragraph));
-		String tokens[] = Tokenize(paragraph);
+		String text = "";
+		try(BufferedReader br = new BufferedReader(new FileReader("11580.txt"))) 
+		{
+	        StringBuilder sb = new StringBuilder();
+	        String line = br.readLine();
+
+	        while (line != null) 
+	        {
+	            sb.append(line);
+	            sb.append(System.lineSeparator());
+	            line = br.readLine();
+	        }
+	        text = sb.toString();
+	    }
 		
-		File dir = new File("c:/spellchecker/");
+		//System.out.println(text);
+		
+		//String paragraph = "How are you? This is Mike. Blah blah blah.";
+		System.out.println("Sentence Count: " + SentenceDetect(text));
+		String tokens[] = Tokenize(text);
+		
+		File dir = new File("spellchecker/");
 		Directory directory = FSDirectory.open(dir);
 
 		SpellChecker spellChecker = new SpellChecker(directory);
@@ -62,7 +76,8 @@ public class AutoGrader
 		int spellErrors = 0;
 		for(int i = 0; i<tokens.length; i++)
 		{
-			if(!spellChecker.exist(tokens[i].toLowerCase()))
+			//TODO Why does the spellchecker not work right!!!!!!!!
+			if(!(spellChecker.exist(tokens[i].toLowerCase())))
 			{
 				System.out.println("Couldn't find " + tokens[i]);
 				spellErrors++;
