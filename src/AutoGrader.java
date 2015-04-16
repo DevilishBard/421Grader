@@ -12,6 +12,8 @@ import opennlp.tools.parser.Parse;
 import opennlp.tools.parser.ParserFactory;
 import opennlp.tools.parser.ParserModel;
 import opennlp.tools.parser.chunking.Parser;
+import opennlp.tools.postag.POSModel;
+import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
 import opennlp.tools.tokenize.Tokenizer;
@@ -84,10 +86,54 @@ public class AutoGrader
 //		}
 //	}
 	
+	public static String[] generateTags(String[] words)
+	{
+		String[] tags = null;
+		InputStream modelIn = null;
+
+		try {
+		  modelIn = new FileInputStream("en-pos-maxent.bin");
+		  POSModel model = new POSModel(modelIn);
+		  POSTaggerME tagger = new POSTaggerME(model);
+		  tags = tagger.tag(words);
+		}
+		catch (IOException e) {
+		  // Model loading failed, handle the error
+		  e.printStackTrace();
+		}
+		finally {
+		  if (modelIn != null) {
+		    try {
+		      modelIn.close();
+		    }
+		    catch (IOException e) {
+		    }
+		  }
+		}
+		
+		
+		return tags;
+	}
+	
+	public static int countErrors(String[] tags)
+	{
+		int count = 0;
+		
+		for (int i = 0; i < tags.length-1; i++)
+		{
+			if((tags[i].equals("NN") && tags[i+1].equals("VBP"))
+					|| (tags[i].equals("NNS") && tags[i+1].equals("VBP")))
+				count++;
+		}
+		
+		return count;
+	}
+	
+	
 	public static void main(String[] args) throws Exception
 	{
 		String text = "";
-		try(BufferedReader br = new BufferedReader(new FileReader("11580.txt"))) 
+		try(BufferedReader br = new BufferedReader(new FileReader("essays/7965.txt"))) 
 		{
 	        StringBuilder sb = new StringBuilder();
 	        String line = br.readLine();
@@ -104,6 +150,7 @@ public class AutoGrader
 		System.out.println("Sentence Count: " + SentenceDetect(text));
 		String tokens[] = Tokenize(text);
 //		parse(text);
+		String[] tags = generateTags(tokens);
 		File dir = new File("spellchecker/");
 		Directory directory = FSDirectory.open(dir);
 
@@ -111,7 +158,14 @@ public class AutoGrader
 
 		spellChecker.indexDictionary(new PlainTextDictionary(new File("421Grader/dictionary3.txt")));
 		
-
+//		for(String s : tags)
+//			System.out.println(s + " ");
+//		
+		
+		for(int i = 0; i<tags.length; i++)
+		{
+			System.out.println(tokens[i] + "|" + tags[i]);
+		}
 		int spellErrors = 0;
 		for(int i = 0; i<tokens.length; i++)
 		{
@@ -126,7 +180,7 @@ public class AutoGrader
 		
 		
 		System.out.println("Spelling Errors: " + spellErrors);
-		
+		System.out.println("Verb agreement errors: " + countErrors(tags));
 		spellChecker.close();
 
 	}
