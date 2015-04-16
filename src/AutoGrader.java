@@ -4,7 +4,14 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
 
+import opennlp.tools.cmdline.parser.ParserTool;
+import opennlp.tools.parser.Parse;
+import opennlp.tools.parser.ParserFactory;
+import opennlp.tools.parser.ParserModel;
+import opennlp.tools.parser.chunking.Parser;
 import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
 import opennlp.tools.tokenize.Tokenizer;
@@ -43,6 +50,40 @@ public class AutoGrader
 		return tokens;
 	}
 	
+//	public static void parse(String sentence)
+//	{
+//		InputStream modelInParse = null;
+//		try 
+//		{
+//			//load chunking model
+//			modelInParse = new FileInputStream("en-parser-chunking.bin"); //from http://opennlp.sourceforge.net/models-1.5/
+//			ParserModel model = new ParserModel(modelInParse);
+//
+//			//create parse tree
+//			Parser parser = (Parser) ParserFactory.create(model);
+//			Parse topParses[] = ParserTool.parseLine(sentence, parser, 1);
+//
+//			for (Parse p : topParses)
+//				p.show();
+//		}
+//		catch (IOException e) 
+//		{
+//			e.printStackTrace();
+//		}
+//		finally {
+//			if (modelInParse != null) 
+//			{
+//				try 
+//				{
+//					modelInParse.close();
+//				}
+//				catch (IOException e) 
+//				{
+//				}
+//			}
+//		}
+//	}
+	
 	public static void main(String[] args) throws Exception
 	{
 		String text = "";
@@ -62,7 +103,7 @@ public class AutoGrader
 		
 		System.out.println("Sentence Count: " + SentenceDetect(text));
 		String tokens[] = Tokenize(text);
-		
+//		parse(text);
 		File dir = new File("spellchecker/");
 		Directory directory = FSDirectory.open(dir);
 
@@ -78,7 +119,7 @@ public class AutoGrader
 			if(tokens[i].length()>=3)
 				if(!(spellChecker.exist(tokens[i].toLowerCase())))
 				{
-					System.out.println("Couldn't find " + tokens[i]);
+					//System.out.println("Couldn't find " + tokens[i]);
 					spellErrors++;
 				}
 		}
