@@ -22,7 +22,32 @@ import org.apache.lucene.store.FSDirectory;
 
 public class AutoGrader
 {
-	
+	public static void main(String[] args)
+	{
+		File folder = new File("input/training/high");
+		File[] listOfFiles = folder.listFiles();
+		String fileNames[];
+		fileNames = new String[listOfFiles.length];
+
+		for (int i = 0; i < listOfFiles.length; i++) 
+		{
+			if (listOfFiles[i].isFile()) 
+			{
+					fileNames[i] = listOfFiles[i].getName();
+			} 
+		}
+		
+		for(String name : fileNames)
+		{
+			try {
+				generateScore(name);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
 	public static int SentenceDetect(String paragraph) throws InvalidFormatException, IOException 
 	{
 		InputStream is = new FileInputStream("res/en-sent.bin");
@@ -45,40 +70,7 @@ public class AutoGrader
 		return tokens;
 	}
 	
-//	public static void parse(String sentence)
-//	{
-//		InputStream modelInParse = null;
-//		try 
-//		{
-//			//load chunking model
-//			modelInParse = new FileInputStream("en-parser-chunking.bin"); //from http://opennlp.sourceforge.net/models-1.5/
-//			ParserModel model = new ParserModel(modelInParse);
-//
-//			//create parse tree
-//			Parser parser = (Parser) ParserFactory.create(model);
-//			Parse topParses[] = ParserTool.parseLine(sentence, parser, 1);
-//
-//			for (Parse p : topParses)
-//				p.show();
-//		}
-//		catch (IOException e) 
-//		{
-//			e.printStackTrace();
-//		}
-//		finally {
-//			if (modelInParse != null) 
-//			{
-//				try 
-//				{
-//					modelInParse.close();
-//				}
-//				catch (IOException e) 
-//				{
-//				}
-//			}
-//		}
-//	}
-	
+
 	public static String[] generateTags(String[] words)
 	{
 		String[] tags = null;
@@ -123,10 +115,10 @@ public class AutoGrader
 	}
 	
 	
-	public static void main(String[] args) throws Exception
+	public static void generateScore(String filename) throws Exception
 	{
 		String text = "";
-		try(BufferedReader br = new BufferedReader(new FileReader("input/training/high/11580.txt"))) 
+		try(BufferedReader br = new BufferedReader(new FileReader("input/training/high/" + filename))) 
 		{
 	        StringBuilder sb = new StringBuilder();
 	        String line = br.readLine();
@@ -140,25 +132,21 @@ public class AutoGrader
 	        text = sb.toString();
 	    }
 		
-		System.out.println("Sentence Count: " + SentenceDetect(text));
+		System.out.print(filename);
+		System.out.print("\tSentence Count: " + SentenceDetect(text));
 		String tokens[] = Tokenize(text);
-//		parse(text);
 		String[] tags = generateTags(tokens);
 		File dir = new File("res/spellchecker/");
 		Directory directory = FSDirectory.open(dir);
 
 		SpellChecker spellChecker = new SpellChecker(directory);
 
-		spellChecker.indexDictionary(new PlainTextDictionary(new File("res/dictionary3.txt")));
+		spellChecker.indexDictionary(new PlainTextDictionary(new File("res/dictionary3.txt")));	
 		
-//		for(String s : tags)
-//			System.out.println(s + " ");
-//		
-		
-		for(int i = 0; i<tags.length; i++)
-		{
-			System.out.println(tokens[i] + "|" + tags[i]);
-		}
+//		for(int i = 0; i<tags.length; i++)
+//		{
+//			System.out.println(tokens[i] + "|" + tags[i]);
+//		}
 		int spellErrors = 0;
 		for(int i = 0; i<tokens.length; i++)
 		{
@@ -166,14 +154,13 @@ public class AutoGrader
 			if(tokens[i].length()>=3)
 				if(!(spellChecker.exist(tokens[i].toLowerCase())))
 				{
-					//System.out.println("Couldn't find " + tokens[i]);
 					spellErrors++;
 				}
 		}
 		
 		
-		System.out.println("Spelling Errors: " + spellErrors);
-		System.out.println("Verb agreement errors: " + countErrors(tags));
+		System.out.print("\tSpelling Errors: " + spellErrors);
+		System.out.println("\tVerb agreement errors: " + countErrors(tags));
 		spellChecker.close();
 
 	}
