@@ -4,14 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
 
-import opennlp.tools.cmdline.parser.ParserTool;
-import opennlp.tools.parser.Parse;
-import opennlp.tools.parser.ParserFactory;
-import opennlp.tools.parser.ParserModel;
-import opennlp.tools.parser.chunking.Parser;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.sentdetect.SentenceDetectorME;
@@ -32,7 +25,7 @@ public class AutoGrader
 	
 	public static int SentenceDetect(String paragraph) throws InvalidFormatException, IOException 
 	{
-		InputStream is = new FileInputStream("en-sent.bin");
+		InputStream is = new FileInputStream("res/en-sent.bin");
 		SentenceModel model = new SentenceModel(is);
 		SentenceDetectorME sdetector = new SentenceDetectorME(model);
 
@@ -43,7 +36,7 @@ public class AutoGrader
 	
 	public static String[] Tokenize(String paragraph) throws InvalidFormatException, IOException 
 	{	
-		InputStream is = new FileInputStream("en-token.bin");
+		InputStream is = new FileInputStream("res/en-token.bin");
 		TokenizerModel model = new TokenizerModel(is);
 		Tokenizer tokenizer = new TokenizerME(model);
 		String tokens[] = tokenizer.tokenize(paragraph);
@@ -92,7 +85,7 @@ public class AutoGrader
 		InputStream modelIn = null;
 
 		try {
-		  modelIn = new FileInputStream("en-pos-maxent.bin");
+		  modelIn = new FileInputStream("res/en-pos-maxent.bin");
 		  POSModel model = new POSModel(modelIn);
 		  POSTaggerME tagger = new POSTaggerME(model);
 		  tags = tagger.tag(words);
@@ -156,7 +149,7 @@ public class AutoGrader
 
 		SpellChecker spellChecker = new SpellChecker(directory);
 
-		spellChecker.indexDictionary(new PlainTextDictionary(new File("421Grader/dictionary3.txt")));
+		spellChecker.indexDictionary(new PlainTextDictionary(new File("res/dictionary3.txt")));
 		
 //		for(String s : tags)
 //			System.out.println(s + " ");
