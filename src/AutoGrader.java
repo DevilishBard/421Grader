@@ -126,7 +126,7 @@ public class AutoGrader
 	public static void main(String[] args) throws Exception
 	{
 		String text = "";
-		try(BufferedReader br = new BufferedReader(new FileReader("essays/7965.txt"))) 
+		try(BufferedReader br = new BufferedReader(new FileReader("input/training/high/11580.txt"))) 
 		{
 	        StringBuilder sb = new StringBuilder();
 	        String line = br.readLine();
@@ -144,7 +144,7 @@ public class AutoGrader
 		String tokens[] = Tokenize(text);
 //		parse(text);
 		String[] tags = generateTags(tokens);
-		File dir = new File("spellchecker/");
+		File dir = new File("res/spellchecker/");
 		Directory directory = FSDirectory.open(dir);
 
 		SpellChecker spellChecker = new SpellChecker(directory);
