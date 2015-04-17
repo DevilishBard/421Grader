@@ -6,7 +6,11 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+
 import java.io.PrintStream;
+
+import java.util.List;
+
 
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
@@ -21,7 +25,18 @@ import org.apache.lucene.search.spell.PlainTextDictionary;
 import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+//import org.languagetool.*;
+//import org.languagetool.language.AmericanEnglish;
+//import org.languagetool.rules.RuleMatch;
 
+
+/*
+ * I had to comment out the code you wrote and the import statements to get rid of some errors
+ * because the libraries you added aren't being tracked by git. Can you just comment your changes 
+ * back in, then right click on the project name then go to 'team' and click on 'add to index'
+ * that should have git track the new libraries. Then if you commit that back everything should be 
+ * fine. Also, you may have to change the build path back to include those new jars. Sorry.
+ */
 
 public class AutoGrader
 {
@@ -40,7 +55,8 @@ public class AutoGrader
 	private static int topicScore     = 0;
 	private static int lengthScore    = 0;
 	
-	public static void main(String[] args)
+
+	public static void main(String[] args) throws Exception
 	{
 		
 //		PrintStream out;
@@ -75,6 +91,8 @@ public class AutoGrader
 				e.printStackTrace();
 			}
 		}
+		
+		//languageToolTest();
 		
 	}
 	public static int SentenceDetect(String paragraph) throws InvalidFormatException, IOException 
@@ -398,4 +416,23 @@ public class AutoGrader
 		spellChecker.close();
 
 	}
+	
+//	public static void languageToolTest() throws Exception
+//	{
+//		JLanguageTool langTool = new JLanguageTool(new AmericanEnglish());
+//		//langTool.activateDefaultPatternRules();  -- only needed for LT 2.8 or earlier
+//		List<RuleMatch> matches = langTool.check("A sentence with a error in the Hitchhiker's Guide tot he Galaxy");
+//		 
+//		for (RuleMatch match : matches) {
+//		  System.out.println("Potential error at line " +
+//		      match.getLine() + ", column " +
+//		      match.getColumn() + ": " + match.getMessage());
+//		  System.out.println("Suggested correction: " +
+//		      match.getSuggestedReplacements());
+//		}
+//
+//		
+//		
+//		
+//	}
 }
