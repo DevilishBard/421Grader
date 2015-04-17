@@ -25,9 +25,9 @@ import org.apache.lucene.search.spell.PlainTextDictionary;
 import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-//import org.languagetool.*;
-//import org.languagetool.language.AmericanEnglish;
-//import org.languagetool.rules.RuleMatch;
+import org.languagetool.*;
+import org.languagetool.language.AmericanEnglish;
+import org.languagetool.rules.RuleMatch;
 
 
 /*
@@ -93,7 +93,9 @@ public class AutoGrader
 			}
 		}
 		
-		//languageToolTest();
+		System.out.print("\n\n");
+		
+		languageToolTest();
 		
 	}
 	public static int SentenceDetect(String paragraph) throws InvalidFormatException, IOException 
@@ -418,22 +420,18 @@ public class AutoGrader
 
 	}
 	
-//	public static void languageToolTest() throws Exception
-//	{
-//		JLanguageTool langTool = new JLanguageTool(new AmericanEnglish());
-//		//langTool.activateDefaultPatternRules();  -- only needed for LT 2.8 or earlier
-//		List<RuleMatch> matches = langTool.check("A sentence with a error in the Hitchhiker's Guide tot he Galaxy");
-//		 
-//		for (RuleMatch match : matches) {
-//		  System.out.println("Potential error at line " +
-//		      match.getLine() + ", column " +
-//		      match.getColumn() + ": " + match.getMessage());
-//		  System.out.println("Suggested correction: " +
-//		      match.getSuggestedReplacements());
-//		}
-//
-//		
-//		
-//		
-//	}
+	public static void languageToolTest() throws Exception
+	{
+		JLanguageTool langTool = new JLanguageTool(new AmericanEnglish());
+		//langTool.activateDefaultPatternRules();  -- only needed for LT 2.8 or earlier
+		List<RuleMatch> matches = langTool.check("A sentence with a error in the Hitchhiker's Guide tot he Galaxy");
+		 
+		for (RuleMatch match : matches) {
+		  System.out.println("Potential error at line " +
+		      match.getLine() + ", column " +
+		      match.getColumn() + ": " + match.getMessage());
+		  System.out.println("Suggested correction: " +
+		      match.getSuggestedReplacements());
+		}	
+	}
 }
