@@ -8,5 +8,41 @@
 	<classpathentry kind="lib" path="res/opennlp-maxent-3.0.3.jar"/>
 	<classpathentry kind="lib" path="res/opennlp-tools-1.5.3.jar"/>
 	<classpathentry kind="lib" path="res/opennlp-uima-1.5.3.jar"/>
+	<classpathentry kind="lib" path="res/annotations.jar"/>
+	<classpathentry kind="lib" path="res/cjftransform.jar"/>
+	<classpathentry kind="lib" path="res/commons-cli.jar"/>
+	<classpathentry kind="lib" path="res/commons-lang.jar"/>
+	<classpathentry kind="lib" path="res/commons-logging.jar"/>
+	<classpathentry kind="lib" path="res/guava.jar"/>
+	<classpathentry kind="lib" path="res/hamcrest-core.jar"/>
+	<classpathentry kind="lib" path="res/hppc.jar"/>
+	<classpathentry kind="lib" path="res/hunspell-native-libs.jar"/>
+	<classpathentry kind="lib" path="res/ictclas4j.jar"/>
+	<classpathentry kind="lib" path="res/jna.jar"/>
+	<classpathentry kind="lib" path="res/jsonic.jar"/>
+	<classpathentry kind="lib" path="res/junit.jar"/>
+	<classpathentry kind="lib" path="res/jwordsplitter.jar"/>
+	<classpathentry kind="lib" path="res/language-detector.jar"/>
+	<classpathentry kind="lib" path="res/languages.jar"/>
+	<classpathentry kind="lib" path="res/languagetool-core-tests.jar"/>
+	<classpathentry kind="lib" path="res/languagetool-core.jar"/>
+	<classpathentry kind="lib" path="res/languagetool-gui-commons.jar"/>
+	<classpathentry kind="lib" path="res/lucene-core.jar"/>
+	<classpathentry kind="lib" path="res/lucene-gosen-ipadic.jar"/>
+	<classpathentry kind="lib" path="res/morfologik-fsa.jar"/>
+	<classpathentry kind="lib" path="res/morfologik-polish.jar"/>
+	<classpathentry kind="lib" path="res/morfologik-speller.jar"/>
+	<classpathentry kind="lib" path="res/morfologik-stemming.jar"/>
+	<classpathentry kind="lib" path="res/morfologik-tools.jar"/>
+	<classpathentry kind="lib" path="res/opennlp-chunk-models.jar"/>
+	<classpathentry kind="lib" path="res/opennlp-maxent.jar"/>
+	<classpathentry kind="lib" path="res/opennlp-postag-models.jar"/>
+	<classpathentry kind="lib" path="res/opennlp-tokenize-models.jar"/>
+	<classpathentry kind="lib" path="res/opennlp-tools.jar"/>
+	<classpathentry kind="lib" path="res/openregex.jar"/>
+	<classpathentry kind="lib" path="res/segment.jar"/>
+	<classpathentry kind="lib" path="res/slf4j-api.jar"/>
+	<classpathentry kind="lib" path="res/slf4j-nop.jar"/>
+	<classpathentry kind="lib" path="res/languages-2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

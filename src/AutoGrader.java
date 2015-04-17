@@ -1,9 +1,11 @@
+//import java.awt.List;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
@@ -18,6 +20,9 @@ import org.apache.lucene.search.spell.PlainTextDictionary;
 import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.languagetool.*;
+import org.languagetool.language.AmericanEnglish;
+import org.languagetool.rules.RuleMatch;
 
 
 public class AutoGrader
@@ -29,7 +34,7 @@ public class AutoGrader
 	// The number of verb-tense, missing verb, and extra verb errors per essay
 	private static int verbTenseErrors = 0;
 	
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
 		// Retrieve the names of the essays from the given directory
 		File folder = new File(inputPath);
@@ -54,6 +59,8 @@ public class AutoGrader
 				e.printStackTrace();
 			}
 		}
+		
+		languageToolTest();
 		
 	}
 	public static int SentenceDetect(String paragraph) throws InvalidFormatException, IOException 
@@ -261,5 +268,24 @@ public class AutoGrader
 		
 		spellChecker.close();
 
+	}
+	
+	public static void languageToolTest() throws Exception
+	{
+		JLanguageTool langTool = new JLanguageTool(new AmericanEnglish());
+		//langTool.activateDefaultPatternRules();  -- only needed for LT 2.8 or earlier
+		List<RuleMatch> matches = langTool.check("A sentence with a error in the Hitchhiker's Guide tot he Galaxy");
+		 
+		for (RuleMatch match : matches) {
+		  System.out.println("Potential error at line " +
+		      match.getLine() + ", column " +
+		      match.getColumn() + ": " + match.getMessage());
+		  System.out.println("Suggested correction: " +
+		      match.getSuggestedReplacements());
+		}
+
+		
+		
+		
 	}
 }
