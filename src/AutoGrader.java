@@ -26,7 +26,7 @@ import org.apache.lucene.store.FSDirectory;
 public class AutoGrader
 {
 	// Temporary path to identify which folder to check for input
-	private static String inputPath = "input/training/high/";
+	private static String inputPath = "input/test/original/low/";
 	// The number of subject-verb agreement errors per essay
 	private static int subVerbErrors = 0;
 	// The number of verb-tense, missing verb, and extra verb errors per essay
@@ -220,22 +220,45 @@ public class AutoGrader
 
 	public static void countErrors2(String[] tags)
 	{
+		boolean foundVerb;
 		for(int i=0; i<tags.length-1; i++)
 		{
-			if((tags[i].equals("MD") && tags[i+2].equals("VBZ")) || (tags[i].equals("MD") && tags[i+1].equals("VBZ")))
+			foundVerb = false;
+			while(!tags[i].equals(".") && i<tags.length-1)
 			{
+				if(tags[i].equals("VBZ") || tags[i].equals("VBP") || tags[i].equals("VB"))
+					foundVerb = true;
+				
+				if((tags[i].equals("MD") && tags[i+2].equals("VBZ")) || (tags[i].equals("MD") && tags[i+1].equals("VBZ")))
+				{
+					verbTenseErrors++;
+				}
+				else if(tags[i].equals("MD") && tags[i+1].equals("VBP"))
+					verbTenseErrors++;
+				else if(tags[i].equals("NN") || tags[i].equals("NNP"))
+				{
+					if(tags[i+1].equals("VB") || tags[i].equals("VBP"))
+						subVerbErrors++;
+				}
+				else if(tags[i].equals("NNS") || tags[i].equals("NNPS"))
+				{
+					if(tags[i+1].equals("VBZ") || tags[i+1].equals("VBP"))
+						subVerbErrors++;
+					if(i<(tags.length-2) && (tags[i+2].equals("VBZ") || tags[i+2].equals("VBP")))
+						subVerbErrors++;
+				}
+				else if(tags[i].equals("PRP") && tags[i+1].equals("VBG"))
+					subVerbErrors++;
+				else if(tags[i].equals("VBP") && (tags[i+1].equals("VBP") || tags[i+1].equals("VB")))
+					verbTenseErrors++;
+				else if(tags[i].equals("VB") && tags[i+1].equals("VBP"))
+					verbTenseErrors++;
+				
+				
+				i++;
+			}
+			if(!foundVerb)
 				verbTenseErrors++;
-			}
-			else if(tags[i].equals("NN") || tags[i].equals("NNP"))
-			{
-				if(tags[i+1].equals("VB"))
-					subVerbErrors++;
-			}
-			else if(tags[i].equals("NNS") || tags[i].equals("NNPS"))
-			{
-				if(tags[i+1].equals("VBZ") || tags[i+1].equals("VBP"))
-					subVerbErrors++;
-			}
 		}
 	}
 	
@@ -290,16 +313,6 @@ public class AutoGrader
 		int e2 = (int)verbAgreeErrorsPer;
 		int e3 = (int)verbTenseErrorsPer;
 		
-//		System.out.print(filename);
-//		// Average sentence counts from training essays: High: 17 Med: 14.6 Low: 11.5
-//		System.out.print("\tSentence Count: " + numSentences);
-//		// Average spelling errors from training: High: 7.6  Med: 13.8   Low: 15.5
-//		System.out.print("\tSpelling Errors: " + e1);
-//		// Average errors: High:  Med:  Low:
-//		System.out.print("\tVerb agreement errors: " + e2);
-//		// Average errors: High:  Med:  Low:
-//		System.out.println("\tVerb Tense, etc. errors: " + e3);
-		
 		
 		// Scale the spelling score to score 1-5
 		if(e1<=40)
@@ -325,20 +338,63 @@ public class AutoGrader
 		else 
 			lengthScore = 1;
 		
+		if(e2 < 25)
+			subVerbScore = 5;
+		else if(e2 < 50)
+			subVerbScore = 4;
+		else if(e2 < 80)
+			subVerbScore = 3;
+		else if(e2 < 100)
+			subVerbScore = 2;
+		else
+			subVerbScore = 1;
+		
+		if(e3 <10)
+			verbTenseScore = 5;
+		else if(e3<15)
+			verbTenseScore = 4;
+		else if(e3<20)
+			verbTenseScore = 3;
+		else if(e3<25)
+			verbTenseScore = 2;
+		else 
+			verbTenseScore = 1;
+		
 		//Calculate total weighted score
 		int totalScore = spellingScore + subVerbScore + verbTenseScore + 2*sentFormScore 
 				+ 2*coherentScore + 3*topicScore + 2*lengthScore;
 		
+		String finalGrade = "Unknown";
+		
+//		if(totalScore > 32)
+//			finalGrade = "High";
+//		else if(totalScore >24)
+//			finalGrade = "Medium";
+//		else 
+//			finalGrade = "Low";
+		
+		
 		System.out.print(filename);
 		System.out.print("\t" + spellingScore);
+		System.out.print("\t" + subVerbScore);
 		System.out.print("\t" + verbTenseScore);
 		System.out.print("\t" + sentFormScore);
 		System.out.print("\t" + coherentScore);
 		System.out.print("\t" + topicScore);
 		System.out.print("\t" + lengthScore);
 		System.out.print("\t" + totalScore);
-		System.out.println("\thigh");
+		System.out.println("\t" + finalGrade);
 		
+		
+//		System.out.print(filename);
+//		// Average sentence counts from training essays: High: 17 Med: 14.6 Low: 11.5
+//		System.out.print("\tSentence Count: " + numSentences);
+//		// Average spelling errors from training: High: 7.6  Med: 13.8   Low: 15.5
+//		System.out.print("\tSpelling Errors: " + e1);
+//		// Average errors: High:  Med:  Low:
+//		System.out.print("\tVerb agreement errors: " + e2);
+//		// Average errors: High:  Med:  Low:
+//		System.out.println("\tVerb Tense, etc. errors: " + e3);
 		spellChecker.close();
 
 	}
