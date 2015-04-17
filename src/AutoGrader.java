@@ -22,12 +22,16 @@ import org.apache.lucene.store.FSDirectory;
 
 public class AutoGrader
 {
-	private static String inputPath = "input/training/medium/";
+	// Temporary path to identify which folder to check for input
+	private static String inputPath = "input/training/low/";
+	// The number of subject-verb agreement errors per essay
 	private static int subVerbErrors = 0;
+	// The number of verb-tense, missing verb, and extra verb errors per essay
 	private static int verbTenseErrors = 0;
 	
 	public static void main(String[] args)
 	{
+		// Retrieve the names of the essays from the given directory
 		File folder = new File(inputPath);
 		File[] listOfFiles = folder.listFiles();
 		String fileNames[];
@@ -41,6 +45,7 @@ public class AutoGrader
 			} 
 		}
 		
+		// Generate and display the score for each essay
 		for(String name : fileNames)
 		{
 			try {
@@ -53,6 +58,7 @@ public class AutoGrader
 	}
 	public static int SentenceDetect(String paragraph) throws InvalidFormatException, IOException 
 	{
+		// Detect the number of sentences in an essay
 		InputStream is = new FileInputStream("res/en-sent.bin");
 		SentenceModel model = new SentenceModel(is);
 		SentenceDetectorME sdetector = new SentenceDetectorME(model);
@@ -64,6 +70,7 @@ public class AutoGrader
 	
 	public static String[] Tokenize(String paragraph) throws InvalidFormatException, IOException 
 	{	
+		// Tokenize the sentence and return an array of tokens
 		InputStream is = new FileInputStream("res/en-token.bin");
 		TokenizerModel model = new TokenizerModel(is);
 		Tokenizer tokenizer = new TokenizerME(model);
@@ -76,6 +83,8 @@ public class AutoGrader
 
 	public static String[] generateTags(String[] words)
 	{
+		
+		// Generate an array of POS tags
 		String[] tags = null;
 		InputStream modelIn = null;
 
@@ -102,6 +111,10 @@ public class AutoGrader
 		return tags;
 	}
 	
+	// Supposed to count the number of verb errors per essay. Does not work at all.
+	// Still working on it.  Supposed to check for verb agreement in number, but 
+	// I'm having trouble identifying which nouns are subjects and which are not.
+	// Gives a lot of false positives for verb agreement errors.
 	public static int countErrors(String[] tags)
 	{
 		int count = 0;
