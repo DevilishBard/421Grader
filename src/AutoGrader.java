@@ -82,6 +82,7 @@ public class AutoGrader
 			} 
 		}
 		
+		
 		// Generate and display the score for each essay
 		for(String name : fileNames)
 		{
