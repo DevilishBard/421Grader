@@ -22,7 +22,7 @@ import org.apache.lucene.store.FSDirectory;
 
 public class AutoGrader
 {
-	private static String inputPath = "input/training/low/";
+	private static String inputPath = "input/training/medium/";
 	private static int subVerbErrors = 0;
 	private static int verbTenseErrors = 0;
 	
@@ -226,16 +226,25 @@ public class AutoGrader
 		}
 		
 		countErrors(tags);
+		int numSentences = SentenceDetect(text);
+		
+		double spellingErrorsPer = (((double)spellErrors)/(double)numSentences)*100;
+		double verbAgreeErrorsPer =  (((double)subVerbErrors)/(double)numSentences)*100;
+		double verbTenseErrorsPer = (((double)verbTenseErrors)/(double)numSentences)*100;
+		
+		int e1 = (int)spellingErrorsPer;
+		int e2 = (int)verbAgreeErrorsPer;
+		int e3 = (int)verbTenseErrorsPer;
 		
 		System.out.print(filename);
 		// Average sentence counts from training essays: High: 17 Med: 14.6 Low: 11.5
-		System.out.print("\tSentence Count: " + SentenceDetect(text));
+		System.out.print("\tSentence Count: " + numSentences);
 		// Average spelling errors from training: High: 7.6  Med: 13.8   Low: 15.5
-		System.out.print("\tSpelling Errors: " + spellErrors);
+		System.out.print("\tSpelling Errors: " + e1);
 		// Average errors: High:  Med:  Low:
-		System.out.print("\tVerb agreement errors: " + subVerbErrors);
+		System.out.print("\tVerb agreement errors: " + e2);
 		// Average errors: High:  Med:  Low:
-		System.out.println("\tVerb Tense, etc. errors: " + verbTenseErrors);
+		System.out.println("\tVerb Tense, etc. errors: " + e3);
 		
 		spellChecker.close();
 
