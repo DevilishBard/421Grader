@@ -1,9 +1,12 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
@@ -23,14 +26,32 @@ import org.apache.lucene.store.FSDirectory;
 public class AutoGrader
 {
 	// Temporary path to identify which folder to check for input
-	private static String inputPath = "input/training/low/";
+	private static String inputPath = "input/training/high/";
 	// The number of subject-verb agreement errors per essay
 	private static int subVerbErrors = 0;
 	// The number of verb-tense, missing verb, and extra verb errors per essay
 	private static int verbTenseErrors = 0;
 	
+	private static int spellingScore  = 0;
+	private static int subVerbScore   = 0;
+	private static int verbTenseScore = 0;
+	private static int sentFormScore  = 0;
+	private static int coherentScore  = 0;
+	private static int topicScore     = 0;
+	private static int lengthScore    = 0;
+	
 	public static void main(String[] args)
 	{
+		
+//		PrintStream out;
+//		try {
+//			out = new PrintStream(new FileOutputStream("output/result.txt"));
+//			System.setOut(out);
+//		} catch (FileNotFoundException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+		
 		// Retrieve the names of the essays from the given directory
 		File folder = new File(inputPath);
 		File[] listOfFiles = folder.listFiles();
@@ -196,7 +217,27 @@ public class AutoGrader
 		
 		return count;
 	}
-	
+
+	public static void countErrors2(String[] tags)
+	{
+		for(int i=0; i<tags.length-1; i++)
+		{
+			if((tags[i].equals("MD") && tags[i+2].equals("VBZ")) || (tags[i].equals("MD") && tags[i+1].equals("VBZ")))
+			{
+				verbTenseErrors++;
+			}
+			else if(tags[i].equals("NN") || tags[i].equals("NNP"))
+			{
+				if(tags[i+1].equals("VB"))
+					subVerbErrors++;
+			}
+			else if(tags[i].equals("NNS") || tags[i].equals("NNPS"))
+			{
+				if(tags[i+1].equals("VBZ") || tags[i+1].equals("VBP"))
+					subVerbErrors++;
+			}
+		}
+	}
 	
 	public static void generateScore(String filename) throws Exception
 	{
@@ -238,7 +279,7 @@ public class AutoGrader
 				}
 		}
 		
-		countErrors(tags);
+		countErrors2(tags);
 		int numSentences = SentenceDetect(text);
 		
 		double spellingErrorsPer = (((double)spellErrors)/(double)numSentences)*100;
@@ -249,15 +290,54 @@ public class AutoGrader
 		int e2 = (int)verbAgreeErrorsPer;
 		int e3 = (int)verbTenseErrorsPer;
 		
+//		System.out.print(filename);
+//		// Average sentence counts from training essays: High: 17 Med: 14.6 Low: 11.5
+//		System.out.print("\tSentence Count: " + numSentences);
+//		// Average spelling errors from training: High: 7.6  Med: 13.8   Low: 15.5
+//		System.out.print("\tSpelling Errors: " + e1);
+//		// Average errors: High:  Med:  Low:
+//		System.out.print("\tVerb agreement errors: " + e2);
+//		// Average errors: High:  Med:  Low:
+//		System.out.println("\tVerb Tense, etc. errors: " + e3);
+		
+		
+		// Scale the spelling score to score 1-5
+		if(e1<=40)
+			spellingScore = 5;
+		else if(e1<=80)
+			spellingScore = 4;
+		else if(e1<=120)
+			spellingScore = 3;
+		else if(e1<=200)
+			spellingScore = 2;
+		else
+			spellingScore = 1;
+		
+		//Scale the length score to score 1-5
+		if(numSentences > 17)
+			lengthScore = 5;
+		else if(numSentences > 15)
+			lengthScore = 4;
+		else if(numSentences > 12)
+			lengthScore = 3;
+		else if(numSentences > 9)
+			lengthScore = 2;
+		else 
+			lengthScore = 1;
+		
+		//Calculate total weighted score
+		int totalScore = spellingScore + subVerbScore + verbTenseScore + 2*sentFormScore 
+				+ 2*coherentScore + 3*topicScore + 2*lengthScore;
+		
 		System.out.print(filename);
-		// Average sentence counts from training essays: High: 17 Med: 14.6 Low: 11.5
-		System.out.print("\tSentence Count: " + numSentences);
-		// Average spelling errors from training: High: 7.6  Med: 13.8   Low: 15.5
-		System.out.print("\tSpelling Errors: " + e1);
-		// Average errors: High:  Med:  Low:
-		System.out.print("\tVerb agreement errors: " + e2);
-		// Average errors: High:  Med:  Low:
-		System.out.println("\tVerb Tense, etc. errors: " + e3);
+		System.out.print("\t" + spellingScore);
+		System.out.print("\t" + verbTenseScore);
+		System.out.print("\t" + sentFormScore);
+		System.out.print("\t" + coherentScore);
+		System.out.print("\t" + topicScore);
+		System.out.print("\t" + lengthScore);
+		System.out.print("\t" + totalScore);
+		System.out.println("\thigh");
 		
 		spellChecker.close();
 
