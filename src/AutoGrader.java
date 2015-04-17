@@ -22,9 +22,11 @@ import org.apache.lucene.store.FSDirectory;
 
 public class AutoGrader
 {
+	private static String inputPath = "input/training/high/";
+	
 	public static void main(String[] args)
 	{
-		File folder = new File("input/training/high");
+		File folder = new File(inputPath);
 		File[] listOfFiles = folder.listFiles();
 		String fileNames[];
 		fileNames = new String[listOfFiles.length];
@@ -42,7 +44,6 @@ public class AutoGrader
 			try {
 				generateScore(name);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -83,7 +84,6 @@ public class AutoGrader
 		  tags = tagger.tag(words);
 		}
 		catch (IOException e) {
-		  // Model loading failed, handle the error
 		  e.printStackTrace();
 		}
 		finally {
@@ -118,7 +118,7 @@ public class AutoGrader
 	public static void generateScore(String filename) throws Exception
 	{
 		String text = "";
-		try(BufferedReader br = new BufferedReader(new FileReader("input/training/high/" + filename))) 
+		try(BufferedReader br = new BufferedReader(new FileReader(inputPath + filename))) 
 		{
 	        StringBuilder sb = new StringBuilder();
 	        String line = br.readLine();
@@ -132,8 +132,7 @@ public class AutoGrader
 	        text = sb.toString();
 	    }
 		
-		System.out.print(filename);
-		System.out.print("\tSentence Count: " + SentenceDetect(text));
+		
 		String tokens[] = Tokenize(text);
 		String[] tags = generateTags(tokens);
 		File dir = new File("res/spellchecker/");
@@ -143,10 +142,6 @@ public class AutoGrader
 
 		spellChecker.indexDictionary(new PlainTextDictionary(new File("res/dictionary3.txt")));	
 		
-//		for(int i = 0; i<tags.length; i++)
-//		{
-//			System.out.println(tokens[i] + "|" + tags[i]);
-//		}
 		int spellErrors = 0;
 		for(int i = 0; i<tokens.length; i++)
 		{
@@ -158,9 +153,14 @@ public class AutoGrader
 				}
 		}
 		
-		
+		System.out.print(filename);
+		// Average sentence counts from training essays: High: 17 Med: 14.6 Low: 11.5
+		System.out.print("\tSentence Count: " + SentenceDetect(text));
+		// Average spelling errors from training: High: 7.6  Med: 13.8   Low: 15.5
 		System.out.print("\tSpelling Errors: " + spellErrors);
+		// Average errors: High:  Med:  Low:
 		System.out.println("\tVerb agreement errors: " + countErrors(tags));
+		
 		spellChecker.close();
 
 	}
