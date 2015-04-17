@@ -22,7 +22,9 @@ import org.apache.lucene.store.FSDirectory;
 
 public class AutoGrader
 {
-	private static String inputPath = "input/training/high/";
+	private static String inputPath = "input/training/low/";
+	private static int subVerbErrors = 0;
+	private static int verbTenseErrors = 0;
 	
 	public static void main(String[] args)
 	{
@@ -103,13 +105,81 @@ public class AutoGrader
 	public static int countErrors(String[] tags)
 	{
 		int count = 0;
+		int j = 0;
+		boolean inPrepPhrase = false;
+		boolean found = false;
 		
 		for (int i = 0; i < tags.length-1; i++)
 		{
-			if((tags[i].equals("NN") && tags[i+1].equals("VBP"))
-					|| (tags[i].equals("NNS") && tags[i+1].equals("VBP")))
-				count++;
+			if(found)
+			{
+				while(i < tags.length-1 && !tags[i].equals("."))
+					i++;
+				found = false;
+			}
+			else if(tags[i].equals("IN"))
+			{
+				inPrepPhrase = true;
+			}
+			else if(tags[i].charAt(0) == 'N')
+			{
+				//System.out.println("Have " + tags[i]);
+				if(inPrepPhrase)
+				{
+					inPrepPhrase = false;
+				}
+				else
+				{
+					found = false;
+					j = i+1;
+					if(tags[i].equals("NN") || tags[i].equals("NNP"))
+					{
+						while(!found && j<tags.length)
+						{
+							switch(tags[j])
+							{
+							case "VBP":
+							case "VBZ": found = true;
+										break;
+							case "VB": subVerbErrors++;
+										found = true;
+										break;
+							case ".": found = true;
+										verbTenseErrors++;
+										break;
+							default: j++;
+										break;
+							}
+						}
+					}
+					else if(tags[i].equals("NNS") || tags[i].equals("NNPS"))
+					{
+						while(!found && j<tags.length)
+						{
+								switch(tags[j])
+								{
+								case "VBP":
+								case "VBZ": found = true;
+										subVerbErrors++;
+										break;
+								case "VB": 	found = true;
+										break;
+								case ".": found = true;
+										verbTenseErrors++;
+										break;
+								default: j++;
+										break;
+							}
+						}
+					}
+				}
+			}
 		}
+			
+//			if((tags[i].equals("NN") && tags[i+1].equals("VBP"))
+//					|| (tags[i].equals("NNS") && tags[i+1].equals("VBP")))
+//				count++;
+		
 		
 		return count;
 	}
@@ -117,6 +187,8 @@ public class AutoGrader
 	
 	public static void generateScore(String filename) throws Exception
 	{
+		subVerbErrors = 0;
+		verbTenseErrors = 0;
 		String text = "";
 		try(BufferedReader br = new BufferedReader(new FileReader(inputPath + filename))) 
 		{
@@ -153,13 +225,17 @@ public class AutoGrader
 				}
 		}
 		
+		countErrors(tags);
+		
 		System.out.print(filename);
 		// Average sentence counts from training essays: High: 17 Med: 14.6 Low: 11.5
 		System.out.print("\tSentence Count: " + SentenceDetect(text));
 		// Average spelling errors from training: High: 7.6  Med: 13.8   Low: 15.5
 		System.out.print("\tSpelling Errors: " + spellErrors);
 		// Average errors: High:  Med:  Low:
-		System.out.println("\tVerb agreement errors: " + countErrors(tags));
+		System.out.print("\tVerb agreement errors: " + subVerbErrors);
+		// Average errors: High:  Med:  Low:
+		System.out.println("\tVerb Tense, etc. errors: " + verbTenseErrors);
 		
 		spellChecker.close();
 
