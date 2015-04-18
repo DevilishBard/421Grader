@@ -236,6 +236,7 @@ public class AutoGrader
 		
 		// Read the file into a string 'text'
 		try(BufferedReader br = new BufferedReader(new FileReader(inputPath + filename))) 
+		//try(BufferedReader br = new BufferedReader(new FileReader(inputPath + "231566.txt"))) 
 		{
 	        StringBuilder sb = new StringBuilder();
 	        String line = br.readLine();
@@ -270,9 +271,11 @@ public class AutoGrader
 			// Lucene spellchecker does not support spellchecking for words
 			// Shorter than 3 characters
 			if(tokens[i].length()>=3)
-				if(!(spellChecker.exist(tokens[i].toLowerCase())))
+				if(!(spellChecker.exist(tokens[i].toLowerCase())) && !(spellChecker.exist(tokens[i])))
 				{
-					spellErrors++;
+					// U.S.A. should be added to the dictionary
+					if(!tokens[i].equals("U.S.A."))
+						spellErrors++;
 				}
 		}
 		
@@ -286,6 +289,7 @@ public class AutoGrader
 		// Normalize the error counts to adjust for length of essay
 		// Returned value for final error counts is in the form
 		// Errors per 100 sentences 
+		
 		double spellingErrorsPer = (((double)spellErrors)/(double)numSentences)*100;
 		double verbAgreeErrorsPer =  (((double)subVerbErrors)/(double)numSentences)*100;
 		double verbTenseErrorsPer = (((double)verbTenseErrors)/(double)numSentences)*100;
@@ -368,7 +372,7 @@ public class AutoGrader
 //		// Average sentence counts from training essays: High: 17 Med: 14.6 Low: 11.5
 //		System.out.print("\tSentence Count: " + numSentences);
 //		// Average spelling errors from training: High: 7.6  Med: 13.8   Low: 15.5
-//		System.out.print("\tSpelling Errors: " + e1);
+//		System.out.print("\tSpelling Errors: " + spellErrors);
 //		// Average errors: High:  Med:  Low:
 //		System.out.print("\tVerb agreement errors: " + e2);
 //		// Average errors: High:  Med:  Low:
