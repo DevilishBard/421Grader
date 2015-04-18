@@ -266,7 +266,6 @@ public class AutoGrader
 		int spellErrors = 0;
 		for(int i = 0; i<tokens.length; i++)
 		{
-			//TODO Fix for two letter words, clitics, and punctuation
 			// Lucene spellchecker does not support spellchecking for words
 			// Shorter than 3 characters
 			if(tokens[i].length()>=3)
@@ -404,7 +403,7 @@ public class AutoGrader
 		}
 		
 		List<RuleMatch> matches = spellCheck.check(textInput);
-		for (RuleMatch match : matches) {
+		for (@SuppressWarnings("unused") RuleMatch match : matches) {
 //		  System.out.println("Potential typo at line " +
 //		          match.getLine() + ", column " +
 //		          match.getColumn() + ": " + match.getMessage());
@@ -429,7 +428,7 @@ public class AutoGrader
 		}
 		
 		List<RuleMatch> matches = grammarCheck.check(textInput);
-		for (RuleMatch match : matches) {
+		for (@SuppressWarnings("unused") RuleMatch match : matches) {
 //		  System.out.println("Potential typo at line " +
 //		          match.getLine() + ", column " +
 //		          match.getColumn() + ": " + match.getMessage());
