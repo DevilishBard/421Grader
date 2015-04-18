@@ -24,6 +24,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.languagetool.*;
 import org.languagetool.language.AmericanEnglish;
+import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 
 
@@ -35,7 +36,7 @@ import org.languagetool.rules.RuleMatch;
 public class AutoGrader
 {
 	// Path to directory containing the essays to be graded
-	private static String inputPath = "input/test/original/low/";
+	private static String inputPath = "input/test/original/high/";
 	// The number of subject-verb agreement errors in the essay
 	private static int subVerbErrors = 0;
 	// The number of verb-tense, missing verb, and extra verb errors in the essay
@@ -57,13 +58,13 @@ public class AutoGrader
 		
 		// Change the System.out printstream so that output is sent to the file
 		// 'reult.txt'
-//		PrintStream out;
-//		try {
-//			out = new PrintStream(new FileOutputStream("output/result.txt"));
-//			System.setOut(out);
-//		} catch (FileNotFoundException e1) {
-//			e1.printStackTrace();
-//		}
+		PrintStream out;
+		try {
+			out = new PrintStream(new FileOutputStream("output/result.txt"));
+			System.setOut(out);
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		}
 		
 		// Retrieve the names of the essays from the given directory
 		File folder = new File(inputPath);
@@ -90,9 +91,7 @@ public class AutoGrader
 			}
 		}
 		
-		System.out.print("\n\n");
-		
-		languageToolTest();
+		//System.out.print("\n\n");
 		
 	}
 	
@@ -279,6 +278,11 @@ public class AutoGrader
 				}
 		}
 		
+		// language tool (LT), getting spelling and grammar error counts
+		int spellErrorsLT = spellCheckerLanguageTool(text);
+		//int grammarErrorsLT = grammarCheckerLanguageTool(text);
+		//
+		
 		// Find the number of verb errors in the essay
 		// Results stored in static variables
 		countErrors2(tags);
@@ -290,6 +294,7 @@ public class AutoGrader
 		// Returned value for final error counts is in the form
 		// Errors per 100 sentences 
 		
+		spellErrors = (spellErrors+spellErrorsLT)/2;
 		double spellingErrorsPer = (((double)spellErrors)/(double)numSentences)*100;
 		double verbAgreeErrorsPer =  (((double)subVerbErrors)/(double)numSentences)*100;
 		double verbTenseErrorsPer = (((double)verbTenseErrors)/(double)numSentences)*100;
@@ -366,6 +371,10 @@ public class AutoGrader
 		System.out.print("\t" + totalScore);
 		System.out.println("\t" + finalGrade);
 		
+		//System.out.println("\t Spelling Errors default:  " + spellErrors);
+		//System.out.println("\t Spelling Errors using LT: " + spellErrorsLT);
+		//System.out.println("\t Grammar Errors using LT:  " + grammarErrorsLT);
+		
 		// Used to analyze numbers of errors for grade scaling
 		// Not necessary for final program
 //		System.out.print(filename);
@@ -382,18 +391,53 @@ public class AutoGrader
 
 	}
 	
-	public static void languageToolTest() throws Exception
+	public static int spellCheckerLanguageTool(String textInput) throws Exception
 	{
-		JLanguageTool langTool = new JLanguageTool(new AmericanEnglish());
-		//langTool.activateDefaultPatternRules();  -- only needed for LT 2.8 or earlier
-		List<RuleMatch> matches = langTool.check("A sentence with a error in the Hitchhiker's Guide tot he Galaxy");
-		 
+		int spellingErrors = 0;
+		
+		JLanguageTool spellCheck = new JLanguageTool(new AmericanEnglish());
+		
+		for (Rule rule : spellCheck.getAllRules()) {
+		  if (!rule.isDictionaryBasedSpellingRule()) { // Enable just spell checking
+			  spellCheck.disableRule(rule.getId());
+		  }
+		}
+		
+		List<RuleMatch> matches = spellCheck.check(textInput);
 		for (RuleMatch match : matches) {
-		  System.out.println("Potential error at line " +
-		      match.getLine() + ", column " +
-		      match.getColumn() + ": " + match.getMessage());
-		  System.out.println("Suggested correction: " +
-		      match.getSuggestedReplacements());
-		}	
+//		  System.out.println("Potential typo at line " +
+//		          match.getLine() + ", column " +
+//		          match.getColumn() + ": " + match.getMessage());
+//		  System.out.println("Suggested correction(s): " +
+//		          match.getSuggestedReplacements());
+			spellingErrors++;
+		}
+		
+		return spellingErrors;
+	}
+	
+	public static int grammarCheckerLanguageTool(String textInput) throws Exception
+	{
+		int grammarErrors = 0;
+		
+		JLanguageTool grammarCheck = new JLanguageTool(new AmericanEnglish());
+		
+		for (Rule rule : grammarCheck.getAllRules()) {
+		  if (rule.isDictionaryBasedSpellingRule()) { // Disable spell checking
+			  grammarCheck.disableRule(rule.getId());
+		  }
+		}
+		
+		List<RuleMatch> matches = grammarCheck.check(textInput);
+		for (RuleMatch match : matches) {
+//		  System.out.println("Potential typo at line " +
+//		          match.getLine() + ", column " +
+//		          match.getColumn() + ": " + match.getMessage());
+//		  System.out.println("Suggested correction(s): " +
+//		          match.getSuggestedReplacements());
+		  grammarErrors++;
+		}
+		
+		return grammarErrors;
 	}
 }
