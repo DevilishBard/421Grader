@@ -6,11 +6,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.io.PrintStream;
-
 import java.util.List;
-
 
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
@@ -30,23 +27,22 @@ import org.languagetool.language.AmericanEnglish;
 import org.languagetool.rules.RuleMatch;
 
 
-/*
- * I had to comment out the code you wrote and the import statements to get rid of some errors
- * because the libraries you added aren't being tracked by git. Can you just comment your changes 
- * back in, then right click on the project name then go to 'team' and click on 'add to index'
- * that should have git track the new libraries. Then if you commit that back everything should be 
- * fine. Also, you may have to change the build path back to include those new jars. Sorry.
- */
 
+/**
+ * Automatically grades essays based on spelling and grammar
+ * @author Peter Hanula, Matt Healy
+ */
 public class AutoGrader
 {
-	// Temporary path to identify which folder to check for input
+	// Path to directory containing the essays to be graded
 	private static String inputPath = "input/test/original/low/";
-	// The number of subject-verb agreement errors per essay
+	// The number of subject-verb agreement errors in the essay
 	private static int subVerbErrors = 0;
-	// The number of verb-tense, missing verb, and extra verb errors per essay
+	// The number of verb-tense, missing verb, and extra verb errors in the essay
 	private static int verbTenseErrors = 0;
 	
+	
+	// Fields to hold the various scores (1-5) for the essay
 	private static int spellingScore  = 0;
 	private static int subVerbScore   = 0;
 	private static int verbTenseScore = 0;
@@ -59,12 +55,13 @@ public class AutoGrader
 	public static void main(String[] args) throws Exception
 	{
 		
+		// Change the System.out printstream so that output is sent to the file
+		// 'reult.txt'
 //		PrintStream out;
 //		try {
 //			out = new PrintStream(new FileOutputStream("output/result.txt"));
 //			System.setOut(out);
 //		} catch (FileNotFoundException e1) {
-//			// TODO Auto-generated catch block
 //			e1.printStackTrace();
 //		}
 		
@@ -83,7 +80,7 @@ public class AutoGrader
 		}
 		
 		
-		// Generate and display the score for each essay
+		// Generate and display the score for each essay in the directory
 		for(String name : fileNames)
 		{
 			try {
@@ -98,6 +95,14 @@ public class AutoGrader
 		languageToolTest();
 		
 	}
+	
+	/**
+	 * Counts the number of sentences in a given block of text
+	 * @param paragraph The block of text to be analyzed for the number of sentences
+	 * @return the number of sentences in the provided text block
+	 * @throws InvalidFormatException
+	 * @throws IOException
+	 */
 	public static int SentenceDetect(String paragraph) throws InvalidFormatException, IOException 
 	{
 		// Detect the number of sentences in an essay
@@ -107,12 +112,20 @@ public class AutoGrader
 
 		String sentences[] = sdetector.sentDetect(paragraph);
 		is.close();
+		
 		return sentences.length;
 	}
 	
+	
+	/**
+	 * Tokenizes the input block of text and returns an array of tokens
+	 * @param paragraph The block of text to be tokenized
+	 * @return An array of strings each string containing one token
+	 * @throws InvalidFormatException
+	 * @throws IOException
+	 */
 	public static String[] Tokenize(String paragraph) throws InvalidFormatException, IOException 
 	{	
-		// Tokenize the sentence and return an array of tokens
 		InputStream is = new FileInputStream("res/en-token.bin");
 		TokenizerModel model = new TokenizerModel(is);
 		Tokenizer tokenizer = new TokenizerME(model);
@@ -123,6 +136,11 @@ public class AutoGrader
 	}
 	
 
+	/**
+	 * Generates POS tags for an array of tokens
+	 * @param words An array of tokens to be tagged
+	 * @return An array of POS tags corresponding the input tokens
+	 */
 	public static String[] generateTags(String[] words)
 	{
 		
@@ -153,95 +171,16 @@ public class AutoGrader
 		return tags;
 	}
 	
-	// Supposed to count the number of verb errors per essay. Does not work at all.
-	// Still working on it.  Supposed to check for verb agreement in number, but 
-	// I'm having trouble identifying which nouns are subjects and which are not.
-	// Gives a lot of false positives for verb agreement errors.
-	public static int countErrors(String[] tags)
-	{
-		int count = 0;
-		int j = 0;
-		boolean inPrepPhrase = false;
-		boolean found = false;
-		
-		for (int i = 0; i < tags.length-1; i++)
-		{
-			if(found)
-			{
-				while(i < tags.length-1 && !tags[i].equals("."))
-					i++;
-				found = false;
-			}
-			else if(tags[i].equals("IN"))
-			{
-				inPrepPhrase = true;
-			}
-			else if(tags[i].charAt(0) == 'N')
-			{
-				//System.out.println("Have " + tags[i]);
-				if(inPrepPhrase)
-				{
-					inPrepPhrase = false;
-				}
-				else
-				{
-					found = false;
-					j = i+1;
-					if(tags[i].equals("NN") || tags[i].equals("NNP"))
-					{
-						while(!found && j<tags.length)
-						{
-							switch(tags[j])
-							{
-							case "VBP":
-							case "VBZ": found = true;
-										break;
-							case "VB": subVerbErrors++;
-										found = true;
-										break;
-							case ".": found = true;
-										verbTenseErrors++;
-										break;
-							default: j++;
-										break;
-							}
-						}
-					}
-					else if(tags[i].equals("NNS") || tags[i].equals("NNPS"))
-					{
-						while(!found && j<tags.length)
-						{
-								switch(tags[j])
-								{
-								case "VBP":
-								case "VBZ": found = true;
-										subVerbErrors++;
-										break;
-								case "VB": 	found = true;
-										break;
-								case ".": found = true;
-										verbTenseErrors++;
-										break;
-								default: j++;
-										break;
-							}
-						}
-					}
-				}
-			}
-		}
-			
-//			if((tags[i].equals("NN") && tags[i+1].equals("VBP"))
-//					|| (tags[i].equals("NNS") && tags[i+1].equals("VBP")))
-//				count++;
-		
-		
-		return count;
-	}
-
+	
+	/**
+	 * Analyzes an array of POS tags in order to find verb errors in a block of text
+	 * @param tags An array of POS tags
+	 */
 	public static void countErrors2(String[] tags)
 	{
+		// Used to ensure that each sentence has a main verb
 		boolean foundVerb;
+		// Scan for sequences of tags that violate grammatical rules
 		for(int i=0; i<tags.length-1; i++)
 		{
 			foundVerb = false;
@@ -283,11 +222,19 @@ public class AutoGrader
 		}
 	}
 	
+	
+	/**
+	 * Analyzes and scores an essay with the given filename
+	 * @param filename The name of the file to be analyzed
+	 * @throws Exception
+	 */
 	public static void generateScore(String filename) throws Exception
 	{
 		subVerbErrors = 0;
 		verbTenseErrors = 0;
 		String text = "";
+		
+		// Read the file into a string 'text'
 		try(BufferedReader br = new BufferedReader(new FileReader(inputPath + filename))) 
 		{
 	        StringBuilder sb = new StringBuilder();
@@ -302,20 +249,26 @@ public class AutoGrader
 	        text = sb.toString();
 	    }
 		
-		
+		// Generate the tokens for the given text
 		String tokens[] = Tokenize(text);
+		// Generate the POS tags for the given essay
 		String[] tags = generateTags(tokens);
+		// Create the directory for the spellchecker to use
 		File dir = new File("res/spellchecker/");
 		Directory directory = FSDirectory.open(dir);
 
+		// Initialize the lucene spellchecker
 		SpellChecker spellChecker = new SpellChecker(directory);
 
+		// Index the provided dictionary for the spellchecker to use
 		spellChecker.indexDictionary(new PlainTextDictionary(new File("res/dictionary3.txt")));	
 		
 		int spellErrors = 0;
 		for(int i = 0; i<tokens.length; i++)
 		{
 			//TODO Fix for two letter words, clitics, and punctuation
+			// Lucene spellchecker does not support spellchecking for words
+			// Shorter than 3 characters
 			if(tokens[i].length()>=3)
 				if(!(spellChecker.exist(tokens[i].toLowerCase())))
 				{
@@ -323,13 +276,19 @@ public class AutoGrader
 				}
 		}
 		
+		// Find the number of verb errors in the essay
+		// Results stored in static variables
 		countErrors2(tags);
+		
+		// Count the number of sentences in the essay
 		int numSentences = SentenceDetect(text);
 		
+		// Normalize the error counts to adjust for length of essay
+		// Returned value for final error counts is in the form
+		// Errors per 100 sentences 
 		double spellingErrorsPer = (((double)spellErrors)/(double)numSentences)*100;
 		double verbAgreeErrorsPer =  (((double)subVerbErrors)/(double)numSentences)*100;
 		double verbTenseErrorsPer = (((double)verbTenseErrors)/(double)numSentences)*100;
-		
 		int e1 = (int)spellingErrorsPer;
 		int e2 = (int)verbAgreeErrorsPer;
 		int e3 = (int)verbTenseErrorsPer;
@@ -359,6 +318,7 @@ public class AutoGrader
 		else 
 			lengthScore = 1;
 		
+		// Scale the number of subject-verb agreement errors 
 		if(e2 < 25)
 			subVerbScore = 5;
 		else if(e2 < 50)
@@ -370,6 +330,7 @@ public class AutoGrader
 		else
 			subVerbScore = 1;
 		
+		// Scale the number of verb tense, etc. errors
 		if(e3 <10)
 			verbTenseScore = 5;
 		else if(e3<15)
@@ -385,16 +346,11 @@ public class AutoGrader
 		int totalScore = spellingScore + subVerbScore + verbTenseScore + 2*sentFormScore 
 				+ 2*coherentScore + 3*topicScore + 2*lengthScore;
 		
+		// Temporarily provide unknown rating until part 2 is completed and 
+		// essay quality can be properly judged and scored
 		String finalGrade = "Unknown";
 		
-//		if(totalScore > 32)
-//			finalGrade = "High";
-//		else if(totalScore >24)
-//			finalGrade = "Medium";
-//		else 
-//			finalGrade = "Low";
-		
-		
+		// Output the results of the analysis to standard out (result.txt)
 		System.out.print(filename);
 		System.out.print("\t" + spellingScore);
 		System.out.print("\t" + subVerbScore);
@@ -406,7 +362,8 @@ public class AutoGrader
 		System.out.print("\t" + totalScore);
 		System.out.println("\t" + finalGrade);
 		
-		
+		// Used to analyze numbers of errors for grade scaling
+		// Not necessary for final program
 //		System.out.print(filename);
 //		// Average sentence counts from training essays: High: 17 Med: 14.6 Low: 11.5
 //		System.out.print("\tSentence Count: " + numSentences);
@@ -416,6 +373,7 @@ public class AutoGrader
 //		System.out.print("\tVerb agreement errors: " + e2);
 //		// Average errors: High:  Med:  Low:
 //		System.out.println("\tVerb Tense, etc. errors: " + e3);
+		
 		spellChecker.close();
 
 	}
