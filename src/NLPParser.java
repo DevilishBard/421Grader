@@ -40,7 +40,7 @@ public class NLPParser
 	}
 	
 	
-	public int parseSentence(final String text) {
+	public Parse parseSentence(final String text) {
 		
 		   int count = 0;
 		   final Parse p = new Parse(text,
@@ -67,13 +67,7 @@ public class NLPParser
 			   }
 			   StringBuffer s = new StringBuffer();
 			   Parse actualParse = parse(p);
-			   actualParse.show(s);
-			   String s2 = s.substring(0, 8);
-			   //System.err.println(s);
-			   if(!(s2.equals("(TOP (S ")))
-				   count++;
-			   //System.err.println(count);
-			   return count;
+			   return actualParse;
 			}
 	
 	private Parser _parser = null;

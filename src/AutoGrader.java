@@ -60,6 +60,8 @@ public class AutoGrader
 	private static int coherentScore  = 0;
 	private static int topicScore     = 0;
 	private static int lengthScore    = 0;
+	private static CoreferenceChecker c;
+	private static String sentences[];
 	
 
 	public static void main(String[] args) throws Exception
@@ -68,6 +70,7 @@ public class AutoGrader
 		// Change the System.out printstream so that output is sent to the file
 		// 'reult.txt'
 		PrintStream out;
+		c = new CoreferenceChecker();
 		try {
 			out = new PrintStream(new FileOutputStream("output/result.txt"));
 			System.setOut(out);
@@ -118,18 +121,23 @@ public class AutoGrader
 		SentenceModel model = new SentenceModel(is);
 		SentenceDetectorME sdetector = new SentenceDetectorME(model);
 
-		String sentences[] = sdetector.sentDetect(paragraph);
+		sentences = sdetector.sentDetect(paragraph);
 		is.close();
 		
 		NLPParser p = new NLPParser();
 		
 		sentenceFormErrors = 0;
-		
+
 		for(String s:sentences)
 		{
-			sentenceFormErrors += p.parseSentence(s);
+			Parse temp = p.parseSentence(s);
+			StringBuffer s2 = new StringBuffer();
+			temp.show(s2);
+			String s3 = s2.substring(0, 8);
+			if(!(s3.equals("(TOP (S ")))
+				sentenceFormErrors++;
 		}
-		
+
 		return sentences.length;
 	}
 	
