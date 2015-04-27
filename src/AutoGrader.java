@@ -50,7 +50,6 @@ public class AutoGrader
 	// The number of sentence formation errors
 	private static int sentenceFormErrors = 0;
 	
-	private Tokenizer _tokenizer;
 	
 	
 	// Fields to hold the various scores (1-5) for the essay
@@ -124,9 +123,11 @@ public class AutoGrader
 		
 		NLPParser p = new NLPParser();
 		
+		sentenceFormErrors = 0;
+		
 		for(String s:sentences)
 		{
-			p.parseSentence(s);
+			sentenceFormErrors += p.parseSentence(s);
 		}
 		
 		return sentences.length;
@@ -389,6 +390,7 @@ public class AutoGrader
 		System.out.print("\t" + topicScore);
 		System.out.print("\t" + lengthScore);
 		System.out.print("\t" + totalScore);
+		System.err.print("\t" + sentenceFormErrors);
 		System.out.println("\t" + finalGrade);
 		
 		
