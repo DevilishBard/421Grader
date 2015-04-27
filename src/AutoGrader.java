@@ -9,6 +9,11 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.List;
 
+import opennlp.tools.parser.AbstractBottomUpParser;
+import opennlp.tools.parser.Parse;
+import opennlp.tools.parser.ParserFactory;
+import opennlp.tools.parser.ParserModel;
+import opennlp.tools.parser.chunking.Parser;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.sentdetect.SentenceDetectorME;
@@ -17,12 +22,13 @@ import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
 import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.Span;
 
 import org.apache.lucene.search.spell.PlainTextDictionary;
 import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.languagetool.*;
+import org.languagetool.JLanguageTool;
 import org.languagetool.language.AmericanEnglish;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
@@ -36,11 +42,15 @@ import org.languagetool.rules.RuleMatch;
 public class AutoGrader
 {
 	// Path to directory containing the essays to be graded
-	private static String inputPath = "input/test/original/high/";
+	private static String inputPath = "input/test/original/";
 	// The number of subject-verb agreement errors in the essay
 	private static int subVerbErrors = 0;
 	// The number of verb-tense, missing verb, and extra verb errors in the essay
 	private static int verbTenseErrors = 0;
+	
+	private static int sentenceFormErrors = 0;
+	
+	private Tokenizer _tokenizer;
 	
 	
 	// Fields to hold the various scores (1-5) for the essay
@@ -170,6 +180,63 @@ public class AutoGrader
 		return tags;
 	}
 	
+	
+	
+		
+	private Parse parseSentence(final String text) {
+		   final Parse p = new Parse(text,
+			         // a new span covering the entire text
+			         new Span(0, text.length()),
+			         // the label for the top if an incomplete node
+			         AbstractBottomUpParser.INC_NODE,
+			         // the probability of this parse...uhhh...? 
+			         1,
+			         // the token index of the head of this parse
+			         0);
+			 
+			   // make sure to initialize the _tokenizer correctly
+			   final Span[] spans = _tokenizer.tokenizePos(text);
+			 
+			   for (int idx=0; idx < spans.length; idx++) {
+			      final Span span = spans[idx];
+			      // flesh out the parse with individual token sub-parses 
+			      p.insert(new Parse(text,
+			            span,
+			            AbstractBottomUpParser.TOK_NODE, 
+			            0,
+			            idx));
+			   }
+			 
+			   Parse actualParse = parse(p);
+			   System.err.println(actualParse);
+			   return actualParse;
+			}
+	
+	private Parser _parser = null;
+	 
+	private Parse parse(final Parse p) {
+	   // lazy initializer
+	   if (_parser == null) {
+	      InputStream modelIn = null;
+	      try {
+	         // Loading the parser model
+	         modelIn = getClass().getResourceAsStream("/en-parser-chunker.bin");
+	         final ParserModel parseModel = new ParserModel(modelIn);
+	         modelIn.close();
+	          
+	         _parser = (Parser) ParserFactory.create(parseModel);
+	      } catch (final IOException ioe) {
+	         ioe.printStackTrace();
+	      } finally {
+	         if (modelIn != null) {
+	            try {
+	               modelIn.close();
+	            } catch (final IOException e) {} // oh well!
+	         }
+	      }
+	   }
+	   return _parser.parse(p);
+	}
 	
 	/**
 	 * Analyzes an array of POS tags in order to find verb errors in a block of text
