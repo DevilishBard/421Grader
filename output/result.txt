@@ -1,0 +1,7 @@
+106467.txt	1	2	3	0	0	0	1	8	Unknown
+107740.txt	5	5	5	0	0	0	3	21	Unknown
+129378.txt	1	1	5	0	0	0	1	9	Unknown
+131324.txt	3	5	1	0	0	0	3	15	Unknown
+14471.txt	3	4	5	0	0	0	5	22	Unknown
+22249.txt	5	5	5	0	0	0	4	23	Unknown
+5105.txt	1	1	1	0	0	0	1	5	Unknown

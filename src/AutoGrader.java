@@ -54,7 +54,6 @@ public class AutoGrader
 	private static int sentenceFormErrors = 0;
 	
 	
-	
 	// Fields to hold the various scores (1-5) for the essay
 	private static int spellingScore  = 0;
 	private static int subVerbScore   = 0;
@@ -433,7 +432,6 @@ public class AutoGrader
 		System.out.print("\t" + topicScore);
 		System.out.print("\t" + lengthScore);
 		System.out.print("\t" + totalScore);
-		//System.err.print("\t" + e4);
 		System.out.println("\t" + finalGrade);
 		
 		
