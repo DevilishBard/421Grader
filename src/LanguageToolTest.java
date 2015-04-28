@@ -128,7 +128,7 @@ public class LanguageToolTest
 		int semanticChecker        = grammarChecker(text, "Semantic", "");
 		int plainEnglishChecker    = grammarChecker(text, "Plain English", "");
 		
-		//int totalChecker           = grammarChecker(text);
+		int totalChecker           = grammarChecker(text);
 
 		//int grammarChecker = grammarChecker(text);
 		
@@ -152,7 +152,7 @@ public class LanguageToolTest
 		System.out.print("\t" + badStyleChecker);
 		System.out.print("\t" + semanticChecker);
 		System.out.print("\t" + plainEnglishChecker);
-		//System.out.print("\t" + totalChecker);
+		System.out.print("\t" + totalChecker);
 		
 		
 		
