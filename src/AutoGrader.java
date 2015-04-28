@@ -97,6 +97,8 @@ public class AutoGrader
 			} 
 		}
 		
+		System.err.println("Program finished");
+		
 		
 		// Generate and display the score for each essay in the directory
 		for(String name : fileNames)
@@ -431,7 +433,7 @@ public class AutoGrader
 		System.out.print("\t" + topicScore);
 		System.out.print("\t" + lengthScore);
 		System.out.print("\t" + totalScore);
-		System.err.print("\t" + e4);
+		//System.err.print("\t" + e4);
 		System.out.println("\t" + finalGrade);
 		
 		
