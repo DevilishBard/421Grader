@@ -7,8 +7,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
+import opennlp.tools.coref.DiscourseEntity;
 import opennlp.tools.parser.AbstractBottomUpParser;
 import opennlp.tools.parser.Parse;
 import opennlp.tools.parser.ParserFactory;
@@ -42,7 +45,7 @@ import org.languagetool.rules.RuleMatch;
 public class AutoGrader
 {
 	// Path to directory containing the essays to be graded
-	private static String inputPath = "input/training/low/";
+	private static String inputPath = "input/training/high/";
 	// The number of subject-verb agreement errors in the essay
 	private static int subVerbErrors = 0;
 	// The number of verb-tense, missing verb, and extra verb errors in the essay
@@ -62,6 +65,7 @@ public class AutoGrader
 	private static int lengthScore    = 0;
 	private static CoreferenceChecker c;
 	private static String sentences[];
+	private static ArrayList<Parse> parses;
 	
 
 	public static void main(String[] args) throws Exception
@@ -71,6 +75,7 @@ public class AutoGrader
 		// 'reult.txt'
 		PrintStream out;
 		c = new CoreferenceChecker();
+		parses = new ArrayList<Parse>();
 		try {
 			out = new PrintStream(new FileOutputStream("output/result.txt"));
 			System.setOut(out);
@@ -131,6 +136,7 @@ public class AutoGrader
 		for(String s:sentences)
 		{
 			Parse temp = p.parseSentence(s);
+			parses.add(temp);
 			StringBuffer s2 = new StringBuffer();
 			temp.show(s2);
 			String s3 = s2.substring(0, 8);
@@ -319,6 +325,19 @@ public class AutoGrader
 		// Count the number of sentences in the essay
 		int numSentences = SentenceDetect(text);
 		
+		
+//		DiscourseEntity[] d =c.findEntityMentions(sentences);
+//		for(DiscourseEntity de:d)
+//		{
+//			System.err.println(de);
+//		}
+		
+		//Sentence Form Errors
+		// Low: 2 1 0 5 3 1 0 0 2 1 => 1.4
+		// Med: 0 1 4 1 0 1 0 2 0 0 => 0.9
+		// Hi : 3 2 0 1 1 0 1 0 3 0 => 1.1
+		
+		
 		// Normalize the error counts to adjust for length of essay
 		// Returned value for final error counts is in the form
 		// Errors per 100 sentences 
@@ -327,9 +346,11 @@ public class AutoGrader
 		double spellingErrorsPer = (((double)spellErrors)/(double)numSentences)*100;
 		double verbAgreeErrorsPer =  (((double)subVerbErrors)/(double)numSentences)*100;
 		double verbTenseErrorsPer = (((double)verbTenseErrors)/(double)numSentences)*100;
+		double sentFormErrorsPer = (((double)sentenceFormErrors)/(double)numSentences)*100;
 		int e1 = (int)spellingErrorsPer;
 		int e2 = (int)verbAgreeErrorsPer;
 		int e3 = (int)verbTenseErrorsPer;
+		int e4 = (int)sentFormErrorsPer;
 		
 		
 		// Scale the spelling score to score 1-5
@@ -380,6 +401,18 @@ public class AutoGrader
 		else 
 			verbTenseScore = 1;
 		
+		//Normalized Sentence Errors Per
+		// Low: 33 7 0 33 13 6 0 0 28 6  => 12.6
+		// Med: 14 3 26 6 0 14 5 11 0 0  =>  7.9
+		// Hi : 15 10 0 14 4 0 7 0 15 16 =>  8.1
+		
+		//Possible cutoffs
+		// 5: <8 errors
+		// 4: <10 errors
+		// 3: <15 errors
+		// 2: <20 errors
+		// 1: >=20 errors
+		
 		//Calculate total weighted score
 		int totalScore = spellingScore + subVerbScore + verbTenseScore + 2*sentFormScore 
 				+ 2*coherentScore + 3*topicScore + 2*lengthScore;
@@ -398,7 +431,7 @@ public class AutoGrader
 		System.out.print("\t" + topicScore);
 		System.out.print("\t" + lengthScore);
 		System.out.print("\t" + totalScore);
-		System.err.print("\t" + sentenceFormErrors);
+		System.err.print("\t" + e4);
 		System.out.println("\t" + finalGrade);
 		
 		
