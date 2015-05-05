@@ -34,7 +34,7 @@ public class NLPParser
 		   if (modelIn != null) {
 		      try {
 		         modelIn.close();
-		      } catch (final IOException e) {} // oh well!
+		      } catch (final IOException e) {} 
 		   }
 		}
 	}
@@ -42,7 +42,7 @@ public class NLPParser
 	
 	public Parse parseSentence(final String text) {
 		
-		   int count = 0;
+		   //int count = 0;
 		   final Parse p = new Parse(text,
 			         // a new span covering the entire text
 			         new Span(0, text.length()),
@@ -65,7 +65,7 @@ public class NLPParser
 			            0,
 			            idx));
 			   }
-			   StringBuffer s = new StringBuffer();
+			   //StringBuffer s = new StringBuffer();
 			   Parse actualParse = parse(p);
 			   return actualParse;
 			}

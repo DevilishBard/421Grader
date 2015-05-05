@@ -45,13 +45,15 @@ import org.languagetool.rules.RuleMatch;
 public class AutoGrader
 {
 	// Path to directory containing the essays to be graded
-	private static String inputPath = "input/test/original/";
+	private static String inputPath = "input/training/low/";
 	// The number of subject-verb agreement errors in the essay
 	private static int subVerbErrors = 0;
 	// The number of verb-tense, missing verb, and extra verb errors in the essay
 	private static int verbTenseErrors = 0;
 	// The number of sentence formation errors
 	private static int sentenceFormErrors = 0;
+	//
+	private static int coherencePercentage = 0;
 	
 	
 	// Fields to hold the various scores (1-5) for the essay
@@ -62,6 +64,7 @@ public class AutoGrader
 	private static int coherentScore  = 0;
 	private static int topicScore     = 0;
 	private static int lengthScore    = 0;
+	
 	private static CoreferenceChecker c;
 	private static String sentences[];
 	private static ArrayList<Parse> parses;
@@ -74,7 +77,7 @@ public class AutoGrader
 		// 'reult.txt'
 		PrintStream out;
 		// VM Argument -DWNSEARCHDIR=res/coref/dict
-		c = new CoreferenceChecker();
+		//c = new CoreferenceChecker();
 		parses = new ArrayList<Parse>();
 		try {
 			out = new PrintStream(new FileOutputStream("output/result.txt"));
@@ -289,6 +292,8 @@ public class AutoGrader
 		String tokens[] = Tokenize(text);
 		// Generate the POS tags for the given essay
 		String[] tags = generateTags(tokens);
+		
+		coherencePercentage = TopicCoherenceChecker.checkCoherence(tokens, tags);
 		// Create the directory for the spellchecker to use
 		File dir = new File("res/spellchecker/");
 		Directory directory = FSDirectory.open(dir);
@@ -326,13 +331,12 @@ public class AutoGrader
 		int numSentences = SentenceDetect(text);
 		
 		
-		DiscourseEntity[] d =c.findEntityMentions(sentences);
-		if(d.length==0)
-			System.err.println("WHYYYYYY?!?!?!?!?!");
-		for(DiscourseEntity de:d)
-		{
-			System.err.println(de);
-		}
+//		DiscourseEntity[] d =c.findEntityMentions(sentences);
+//		
+//		for(DiscourseEntity de:d)
+//		{
+//			System.err.println(de);
+//		}
 		
 		//Sentence Form Errors
 		// Low: 2 1 0 5 3 1 0 0 2 1 => 1.4
@@ -420,10 +424,17 @@ public class AutoGrader
 			sentFormScore = 2;
 		else
 			sentFormScore = 1;
-		// 4: <10 errors
-		// 3: <15 errors
-		// 2: <20 errors
-		// 1: >=20 errors
+
+		if(coherencePercentage > 18)
+			topicScore = 5;
+		else if(coherencePercentage >=14)
+			topicScore = 4;
+		else if(coherencePercentage >=10)
+			topicScore = 3;
+		else if(coherencePercentage >=8)
+			topicScore = 2;
+		else
+			topicScore = 1;
 		
 		//Calculate total weighted score
 		int totalScore = spellingScore + subVerbScore + verbTenseScore + 2*sentFormScore 

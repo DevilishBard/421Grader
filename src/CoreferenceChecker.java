@@ -39,7 +39,8 @@ public class CoreferenceChecker
 	      for (int i=0; i < sentences.length; i++) {
 	         // generate the sentence parse tree
 	         final Parse parse = p.parseSentence(sentences[i]);
-	         
+	         System.out.println("From fEM");
+	         parse.show();
 	         final DefaultParse parseWrapper = new DefaultParse(parse, i);
 	         final Mention[] extents = linker().getMentionFinder().getMentions(parseWrapper);
 	         

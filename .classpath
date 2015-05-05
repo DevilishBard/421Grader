@@ -44,5 +44,6 @@
 	<classpathentry kind="lib" path="res/segment.jar"/>
 	<classpathentry kind="lib" path="res/slf4j-api.jar"/>
 	<classpathentry kind="lib" path="res/slf4j-nop.jar"/>
+	<classpathentry kind="lib" path="res/jaws-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
