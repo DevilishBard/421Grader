@@ -118,6 +118,8 @@ public class AutoGrader
 		SentenceModel model = new SentenceModel(is);
 		SentenceDetectorME sdetector = new SentenceDetectorME(model);
 
+		paragraph = paragraph.replace(".", ". ");
+		
 		sentences = sdetector.sentDetect(paragraph);
 		is.close();
 		
@@ -331,8 +333,13 @@ public class AutoGrader
 		int e3 = (int)verbTenseErrorsPer;
 		int e4 = (int)sentFormErrorsPer;
 		
+		//TODO
+		System.err.println(e3);
 		
-		// Scale the spelling score to score 1-5
+		//Spelling Error Training Data
+		// Low: 154 23 93 86 76  23 580 41 285  43 => 140.4
+		// Med: 192 44 43 40 27 228  55 52  50 138 =>  86.9
+		// Hi :  15 30 20 42  4  57  71 40  15 115 =>  40.9
 		if(e1<=40)
 			spellingScore = 5;
 		else if(e1<=80)
@@ -344,19 +351,25 @@ public class AutoGrader
 		else
 			spellingScore = 1;
 		
-		//Scale the length score to score 1-5
-		if(numSentences > 17)
+		//Sentence Length Training Data
+		// Low: 11 13 15 15 26 17  5 12  7 16 => 13.7
+		// Med: 14 29 16 15 11  7 18 17 14 13 => 15.4
+		// Hi : 19 20 15 14 25 14 14 20 20 13 => 13.7
+		if(numSentences >= 19)
 			lengthScore = 5;
 		else if(numSentences > 15)
 			lengthScore = 4;
 		else if(numSentences > 12)
 			lengthScore = 3;
-		else if(numSentences > 9)
+		else if(numSentences > 10)
 			lengthScore = 2;
 		else 
 			lengthScore = 1;
 		
-		// Scale the number of subject-verb agreement errors 
+		//Subject Verb Agreement Training Data
+		// Low: 45 23 60 13 26 17 100 16 28 25 => 35.3
+		// Med: 50 31  0 40 81 85  22 47 28 38 => 42.2
+		// Hi : 36 55 53 35  0 50  57 45 15 38 => 38.4
 		if(e2 < 25)
 			subVerbScore = 5;
 		else if(e2 < 50)
@@ -368,14 +381,17 @@ public class AutoGrader
 		else
 			subVerbScore = 1;
 		
-		// Scale the number of verb tense, etc. errors
-		if(e3 <10)
+		//Verb Tense etc. Training Data
+		// Low:  9 7 0 33  0  0 20  0 0 6 => 7.5
+		// Med: 14 3 6 20  0 14  0 11 0 0 => 6.8
+		// Hi : 21 0 0  0 16  7  0  0 5 7 => 5.6
+		if(e3 <=5)
 			verbTenseScore = 5;
-		else if(e3<15)
+		else if(e3<=12)
 			verbTenseScore = 4;
-		else if(e3<20)
+		else if(e3<=20)
 			verbTenseScore = 3;
-		else if(e3<25)
+		else if(e3<=25)
 			verbTenseScore = 2;
 		else 
 			verbTenseScore = 1;
@@ -410,7 +426,10 @@ public class AutoGrader
 		else
 			topicScore = 1;
 		
-		//Calculate total weighted score
+		//Total Weighted Score Training Data
+		// Low: 
+		// Med:
+		// Hi :
 		int totalScore = spellingScore + subVerbScore + verbTenseScore + 2*sentFormScore 
 				+ 2*coherentScore + 3*topicScore + 2*lengthScore;
 		
@@ -421,9 +440,6 @@ public class AutoGrader
 			finalGrade = "Medium";
 		else
 			finalGrade = "High";
-		
-		// Temporarily provide unknown rating until part 2 is completed and 
-		// essay quality can be properly judged and scored
 		
 		
 		// Output the results of the analysis to standard out (result.txt)

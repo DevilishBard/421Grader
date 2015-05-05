@@ -1,10 +1,10 @@
-106467.txt	1	2	3	1	0	4	1	22	Low
+106467.txt	2	4	5	1	0	4	2	29	Medium
 107740.txt	5	5	5	5	0	3	3	40	High
-129378.txt	1	1	5	5	0	4	1	31	Medium
+129378.txt	3	3	5	3	0	4	3	35	High
 131324.txt	3	5	1	1	0	3	3	26	Medium
-14471.txt	3	4	5	3	0	5	5	43	High
-22249.txt	5	5	5	5	0	3	4	42	High
-5105.txt	1	1	1	5	0	4	1	27	Medium
+14471.txt	4	4	5	2	0	5	5	42	High
+22249.txt	5	5	5	3	0	3	4	38	High
+5105.txt	1	1	2	1	0	4	1	20	Low
 59730.txt	4	5	5	5	0	1	2	31	Medium
 81218.txt	1	4	5	1	0	3	1	23	Low
 92842.txt	4	4	5	5	0	2	4	37	High
