@@ -23,7 +23,7 @@ public class CoreferenceChecker
 	{
 
 		try {
-			_linker = new DefaultLinker("res/coref", LinkerMode.EVAL);
+			_linker = new DefaultLinker("res/coref", LinkerMode.TEST);
 		} catch (final IOException ioe) {
 			ioe.printStackTrace();
 		}
