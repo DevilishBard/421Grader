@@ -1,9 +1,7 @@
-import java.awt.List;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
-
 import opennlp.tools.coref.DefaultLinker;
 import opennlp.tools.coref.DiscourseEntity;
 import opennlp.tools.coref.Linker;
@@ -17,7 +15,6 @@ public class CoreferenceChecker
 {
 	Linker _linker = null;
 	NLPParser p = null;
-	static final private String COREF_DIR = "opennlp.coref.dir";
 	
 	public CoreferenceChecker()
 	{
