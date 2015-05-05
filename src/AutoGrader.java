@@ -45,7 +45,7 @@ import org.languagetool.rules.RuleMatch;
 public class AutoGrader
 {
 	// Path to directory containing the essays to be graded
-	private static String inputPath = "input/training/high/";
+	private static String inputPath = "input/test/original/";
 	// The number of subject-verb agreement errors in the essay
 	private static int subVerbErrors = 0;
 	// The number of verb-tense, missing verb, and extra verb errors in the essay
@@ -73,6 +73,7 @@ public class AutoGrader
 		// Change the System.out printstream so that output is sent to the file
 		// 'reult.txt'
 		PrintStream out;
+		// VM Argument -DWNSEARCHDIR=res/coref/dict
 		c = new CoreferenceChecker();
 		parses = new ArrayList<Parse>();
 		try {
@@ -96,9 +97,6 @@ public class AutoGrader
 			} 
 		}
 		
-		System.err.println("Program finished");
-		
-		
 		// Generate and display the score for each essay in the directory
 		for(String name : fileNames)
 		{
@@ -109,6 +107,7 @@ public class AutoGrader
 			}
 		}
 		
+		System.err.println("Program finished");
 		//System.out.print("\n\n");
 		
 	}
@@ -316,7 +315,7 @@ public class AutoGrader
 		
 		// language tool (LT), getting spelling and grammar error counts
 		int spellErrorsLT = spellCheckerLanguageTool(text);
-		//int grammarErrorsLT = grammarCheckerLanguageTool(text);
+		int grammarErrorsLT = grammarCheckerLanguageTool(text);
 		//
 		
 		// Find the number of verb errors in the essay
@@ -327,11 +326,13 @@ public class AutoGrader
 		int numSentences = SentenceDetect(text);
 		
 		
-//		DiscourseEntity[] d =c.findEntityMentions(sentences);
-//		for(DiscourseEntity de:d)
-//		{
-//			System.err.println(de);
-//		}
+		DiscourseEntity[] d =c.findEntityMentions(sentences);
+		if(d.length==0)
+			System.err.println("WHYYYYYY?!?!?!?!?!");
+		for(DiscourseEntity de:d)
+		{
+			System.err.println(de);
+		}
 		
 		//Sentence Form Errors
 		// Low: 2 1 0 5 3 1 0 0 2 1 => 1.4
@@ -402,13 +403,23 @@ public class AutoGrader
 		else 
 			verbTenseScore = 1;
 		
+		
+		
 		//Normalized Sentence Errors Per
 		// Low: 33 7 0 33 13 6 0 0 28 6  => 12.6
 		// Med: 14 3 26 6 0 14 5 11 0 0  =>  7.9
 		// Hi : 15 10 0 14 4 0 7 0 15 16 =>  8.1
 		
-		//Possible cutoffs
-		// 5: <8 errors
+		if(e4<8)
+			sentFormScore = 5;
+		else if(e4<10)
+			sentFormScore = 4;
+		else if(e4<15)
+			sentFormScore = 3;
+		else if(e4<20)
+			sentFormScore = 2;
+		else
+			sentFormScore = 1;
 		// 4: <10 errors
 		// 3: <15 errors
 		// 2: <20 errors
@@ -418,9 +429,17 @@ public class AutoGrader
 		int totalScore = spellingScore + subVerbScore + verbTenseScore + 2*sentFormScore 
 				+ 2*coherentScore + 3*topicScore + 2*lengthScore;
 		
+		String finalGrade = "Unknown";
+		if(totalScore < 25)
+			finalGrade = "Low";
+		else if(totalScore < 32)
+			finalGrade = "Medium";
+		else
+			finalGrade = "High";
+		
 		// Temporarily provide unknown rating until part 2 is completed and 
 		// essay quality can be properly judged and scored
-		String finalGrade = "Unknown";
+		
 		
 		// Output the results of the analysis to standard out (result.txt)
 		System.out.print(filename);

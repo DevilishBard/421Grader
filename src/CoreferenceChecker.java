@@ -59,11 +59,11 @@ public class CoreferenceChecker
 	      if (!document.isEmpty()) {
 	    	  try
 	    	  {
-	         return linker().getEntities(document.toArray(new Mention[0]));
+	    		  return linker().getEntities(document.toArray(new Mention[1]));
 	    	  }
 	    	  catch(NoSuchElementException e)
 	    	  {
-	    		  
+	    		  System.err.println("No such element");
 	    	  }
 	      }
 	      return new DiscourseEntity[0];
