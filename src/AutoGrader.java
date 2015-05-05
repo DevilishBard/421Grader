@@ -425,6 +425,8 @@ public class AutoGrader
 		else
 			topicScore = 1;
 		
+		
+		
 		//Total Weighted Score Training Data
 		// Low: 
 		// Med:
