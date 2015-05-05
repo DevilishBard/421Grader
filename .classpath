@@ -45,5 +45,19 @@
 	<classpathentry kind="lib" path="res/slf4j-api.jar"/>
 	<classpathentry kind="lib" path="res/slf4j-nop.jar"/>
 	<classpathentry kind="lib" path="res/jaws-bin.jar"/>
+	<classpathentry kind="lib" path="res/corenlp/ejml-0.23.jar"/>
+	<classpathentry kind="lib" path="res/corenlp/javax.json-api-1.0-sources.jar"/>
+	<classpathentry kind="lib" path="res/corenlp/javax.json.jar"/>
+	<classpathentry kind="lib" path="res/corenlp/joda-time-2.1-sources.jar"/>
+	<classpathentry kind="lib" path="res/corenlp/joda-time.jar"/>
+	<classpathentry kind="lib" path="res/corenlp/jollyday-0.4.7-sources.jar"/>
+	<classpathentry kind="lib" path="res/corenlp/jollyday.jar"/>
+	<classpathentry kind="lib" path="res/corenlp/protobuf.jar"/>
+	<classpathentry kind="lib" path="res/corenlp/stanford-corenlp-3.5.2-javadoc.jar"/>
+	<classpathentry kind="lib" path="res/corenlp/stanford-corenlp-3.5.2-models.jar"/>
+	<classpathentry kind="lib" path="res/corenlp/stanford-corenlp-3.5.2-sources.jar"/>
+	<classpathentry kind="lib" path="res/corenlp/stanford-corenlp-3.5.2.jar"/>
+	<classpathentry kind="lib" path="res/corenlp/xom-1.2.10-src.jar"/>
+	<classpathentry kind="lib" path="res/corenlp/xom.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
