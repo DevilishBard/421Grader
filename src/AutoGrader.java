@@ -311,11 +311,13 @@ public class AutoGrader
 		
 		// language tool (LT), getting spelling and grammar error counts
 		int spellErrorsLT = spellCheckerLanguageTool(text);
-		//int grammarErrorsLT = grammarCheckerLanguageTool(text);
 		
 		// Find the number of verb errors in the essay
 		// Results stored in static variables
 		countErrors2(tags);
+		
+		subVerbErrors += LanguageToolTest.grammarChecker(text, "grammar", "agreement");
+		subVerbErrors /= 2;
 		
 		// Count the number of sentences in the essay
 		int numSentences = SentenceDetect(text);
@@ -332,9 +334,6 @@ public class AutoGrader
 		int e2 = (int)verbAgreeErrorsPer;
 		int e3 = (int)verbTenseErrorsPer;
 		int e4 = (int)sentFormErrorsPer;
-		
-		//TODO
-		System.err.println(e3);
 		
 		//Spelling Error Training Data
 		// Low: 154 23 93 86 76  23 580 41 285  43 => 140.4
@@ -354,7 +353,7 @@ public class AutoGrader
 		//Sentence Length Training Data
 		// Low: 11 13 15 15 26 17  5 12  7 16 => 13.7
 		// Med: 14 29 16 15 11  7 18 17 14 13 => 15.4
-		// Hi : 19 20 15 14 25 14 14 20 20 13 => 13.7
+		// Hi : 19 20 15 14 25 14 14 20 20 13 => 17.4
 		if(numSentences >= 19)
 			lengthScore = 5;
 		else if(numSentences > 15)
@@ -367,16 +366,16 @@ public class AutoGrader
 			lengthScore = 1;
 		
 		//Subject Verb Agreement Training Data
-		// Low: 45 23 60 13 26 17 100 16 28 25 => 35.3
-		// Med: 50 31  0 40 81 85  22 47 28 38 => 42.2
-		// Hi : 36 55 53 35  0 50  57 45 15 38 => 38.4
-		if(e2 < 25)
+		// Low: 27 15 33 13 11 11 40 8  14 12 => 18.4
+		// Med: 21 17  0 20 36 42 16 23 14 23 => 21.2
+		// Hi : 15 25 26 21  0 28 28 25  5 15 => 18.8
+		if(e2 < 20)
 			subVerbScore = 5;
-		else if(e2 < 50)
+		else if(e2 < 25)
 			subVerbScore = 4;
-		else if(e2 < 80)
+		else if(e2 < 30)
 			subVerbScore = 3;
-		else if(e2 < 100)
+		else if(e2 < 35)
 			subVerbScore = 2;
 		else
 			subVerbScore = 1;
@@ -454,6 +453,8 @@ public class AutoGrader
 		System.out.print("\t" + totalScore);
 		System.out.println("\t" + finalGrade);
 		
+		
+		System.err.println(e2);
 		spellChecker.close();
 	}
 	
