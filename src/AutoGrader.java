@@ -9,14 +9,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
-
-import opennlp.tools.coref.DiscourseEntity;
-import opennlp.tools.parser.AbstractBottomUpParser;
 import opennlp.tools.parser.Parse;
-import opennlp.tools.parser.ParserFactory;
-import opennlp.tools.parser.ParserModel;
-import opennlp.tools.parser.chunking.Parser;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.sentdetect.SentenceDetectorME;
@@ -25,8 +18,6 @@ import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
 import opennlp.tools.util.InvalidFormatException;
-import opennlp.tools.util.Span;
-
 import org.apache.lucene.search.spell.PlainTextDictionary;
 import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.store.Directory;
@@ -65,7 +56,6 @@ public class AutoGrader
 	private static int topicScore     = 0;
 	private static int lengthScore    = 0;
 	
-	private static CoreferenceChecker c;
 	private static String sentences[];
 	private static ArrayList<Parse> parses;
 	
@@ -76,9 +66,8 @@ public class AutoGrader
 		// Change the System.out printstream so that output is sent to the file
 		// 'reult.txt'
 		PrintStream out;
-		// VM Argument -DWNSEARCHDIR=res/coref/dict
-		//c = new CoreferenceChecker();
 		parses = new ArrayList<Parse>();
+		
 		try {
 			out = new PrintStream(new FileOutputStream("output/result.txt"));
 			System.setOut(out);
@@ -320,8 +309,7 @@ public class AutoGrader
 		
 		// language tool (LT), getting spelling and grammar error counts
 		int spellErrorsLT = spellCheckerLanguageTool(text);
-		int grammarErrorsLT = grammarCheckerLanguageTool(text);
-		//
+		//int grammarErrorsLT = grammarCheckerLanguageTool(text);
 		
 		// Find the number of verb errors in the essay
 		// Results stored in static variables
@@ -330,24 +318,9 @@ public class AutoGrader
 		// Count the number of sentences in the essay
 		int numSentences = SentenceDetect(text);
 		
-		
-//		DiscourseEntity[] d =c.findEntityMentions(sentences);
-//		
-//		for(DiscourseEntity de:d)
-//		{
-//			System.err.println(de);
-//		}
-		
-		//Sentence Form Errors
-		// Low: 2 1 0 5 3 1 0 0 2 1 => 1.4
-		// Med: 0 1 4 1 0 1 0 2 0 0 => 0.9
-		// Hi : 3 2 0 1 1 0 1 0 3 0 => 1.1
-		
-		
 		// Normalize the error counts to adjust for length of essay
 		// Returned value for final error counts is in the form
 		// Errors per 100 sentences 
-		
 		spellErrors = (spellErrors+spellErrorsLT)/2;
 		double spellingErrorsPer = (((double)spellErrors)/(double)numSentences)*100;
 		double verbAgreeErrorsPer =  (((double)subVerbErrors)/(double)numSentences)*100;
@@ -407,13 +380,10 @@ public class AutoGrader
 		else 
 			verbTenseScore = 1;
 		
-		
-		
 		//Normalized Sentence Errors Per
 		// Low: 33 7 0 33 13 6 0 0 28 6  => 12.6
 		// Med: 14 3 26 6 0 14 5 11 0 0  =>  7.9
 		// Hi : 15 10 0 14 4 0 7 0 15 16 =>  8.1
-		
 		if(e4<8)
 			sentFormScore = 5;
 		else if(e4<10)
@@ -425,6 +395,10 @@ public class AutoGrader
 		else
 			sentFormScore = 1;
 
+		//Coherence Percentages
+		// Low: 16 12 16 11 22 13 14  5 11  8 => 12.8
+		// Med: 13 17 13 16 15  5 12 16 19 12 => 13.8
+		// Hi : 14 14  9 13 22 22 12 23  8  7 => 14.6
 		if(coherencePercentage > 18)
 			topicScore = 5;
 		else if(coherencePercentage >=14)
@@ -464,25 +438,7 @@ public class AutoGrader
 		System.out.print("\t" + totalScore);
 		System.out.println("\t" + finalGrade);
 		
-		
-		//System.out.println("\t Spelling Errors default:  " + spellErrors);
-		//System.out.println("\t Spelling Errors using LT: " + spellErrorsLT);
-		//System.out.println("\t Grammar Errors using LT:  " + grammarErrorsLT);
-		
-		// Used to analyze numbers of errors for grade scaling
-		// Not necessary for final program
-//		System.out.print(filename);
-//		// Average sentence counts from training essays: High: 17 Med: 14.6 Low: 11.5
-//		System.out.print("\tSentence Count: " + numSentences);
-//		// Average spelling errors from training: High: 7.6  Med: 13.8   Low: 15.5
-//		System.out.print("\tSpelling Errors: " + spellErrors);
-//		// Average errors: High:  Med:  Low:
-//		System.out.print("\tVerb agreement errors: " + e2);
-//		// Average errors: High:  Med:  Low:
-//		System.out.println("\tVerb Tense, etc. errors: " + e3);
-		
 		spellChecker.close();
-
 	}
 	
 	public static int spellCheckerLanguageTool(String textInput) throws Exception
