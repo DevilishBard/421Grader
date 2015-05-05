@@ -9,6 +9,10 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Map.Entry;
+
 import opennlp.tools.parser.Parse;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
@@ -18,6 +22,7 @@ import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
 import opennlp.tools.util.InvalidFormatException;
+
 import org.apache.lucene.search.spell.PlainTextDictionary;
 import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.store.Directory;
@@ -26,6 +31,9 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.language.AmericanEnglish;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
+
+import edu.stanford.nlp.dcoref.CorefChain;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 
 
@@ -36,7 +44,7 @@ import org.languagetool.rules.RuleMatch;
 public class AutoGrader
 {
 	// Path to directory containing the essays to be graded
-	private static String inputPath = "input/training/low/";
+	private static String inputPath = "input/test/original/";
 	// The number of subject-verb agreement errors in the essay
 	private static int subVerbErrors = 0;
 	// The number of verb-tense, missing verb, and extra verb errors in the essay
@@ -89,11 +97,30 @@ public class AutoGrader
 			} 
 		}
 		
+		Properties props = new Properties();
+		props.setProperty("annotators",
+				"tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+		
+		//props.put("dcoref.score", true);
+		
+		StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
+		
+//		for (String name : fileNames) {
+//			try {
+//				//System.out.println("" + name);
+//				StanfordChecker.generateScore(name, pipeline);
+//				//System.out.println("");
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
+		
 		// Generate and display the score for each essay in the directory
 		for(String name : fileNames)
 		{
 			try {
-				generateScore(name);
+				generateScore(name, pipeline);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -257,7 +284,7 @@ public class AutoGrader
 	 * @param filename The name of the file to be analyzed
 	 * @throws Exception
 	 */
-	public static void generateScore(String filename) throws Exception
+	public static void generateScore(String filename, StanfordCoreNLP pipeline) throws Exception
 	{
 		subVerbErrors = 0;
 		verbTenseErrors = 0;
@@ -278,6 +305,52 @@ public class AutoGrader
 	        }
 	        text = sb.toString();
 	    }
+		
+		
+		String text2 = text.replace(".", ". ");
+		
+		int countSingleRefer = 0;
+		int countMultipleRefer = 0;
+		int countSingleAdded = 0;
+		int countMultipleAdded = 0;
+		
+		
+		Map<Integer, CorefChain> graph = StanfordChecker.coreferenceResolution(text2, pipeline);
+		for (Entry<Integer, CorefChain> entry : graph.entrySet()) {
+			//System.out.println(entry.getValue());
+			//System.out.print(entry.getValue().getMentionsInTextualOrder().size() + ", ");
+			
+			if (entry.getValue().getMentionsInTextualOrder().size() == 1) {
+				countSingleRefer++;
+				countSingleAdded += entry.getValue().getMentionsInTextualOrder().size();
+			}
+			else {
+				countMultipleRefer++;
+				countMultipleAdded += entry.getValue().getMentionsInTextualOrder().size();
+			}
+			
+		}
+		
+		//System.out.println("");
+		//System.out.println("countSingleRefer:   " + countSingleRefer);
+		//System.out.println("countMultipleRefer: " + countMultipleRefer);
+		//System.out.println("           ratio:   " + (double)countSingleRefer / (double)countMultipleRefer);
+		//System.out.println("countSingleAdded:   " + countSingleAdded);
+		//System.out.println("countMultipleAdded: " + countMultipleAdded);
+		//System.out.println("           ratio:   " + (double)countSingleAdded / (double)countMultipleAdded);
+		
+		double ratio1 = (double)countSingleRefer / (double)countMultipleRefer;
+		double ratio2 = (double)countSingleAdded / (double)countMultipleAdded;
+		
+		double totalAdd1 = ratio1 + ratio2;
+//		System.err.println(totalAdd1);
+//		double totalDiv1 = ratio1 / ratio2;
+//		double totalDiv2 = ratio2 / ratio1;
+		
+//		System.out.println(" TotalAdd1: " + totalAdd1);
+//		System.out.println(" TotalDiv1: " + totalDiv1);
+//		System.out.println(" TotalDiv2: " + totalDiv2);
+		
 		
 		// Generate the tokens for the given text
 		String tokens[] = Tokenize(text);
@@ -425,17 +498,24 @@ public class AutoGrader
 		else
 			topicScore = 1;
 		
-		//Total Weighted Score Training Data
-		// Low: 
-		// Med:
-		// Hi :
+		if(totalAdd1 <3.5)
+			coherentScore = 5;
+		else if(totalAdd1 < 5)
+			coherentScore = 4;
+		else if(totalAdd1 < 6.5)
+			coherentScore = 3;
+		else if(totalAdd1 < 7)
+			coherentScore = 2;
+		else coherentScore = 1;
+		
+		//Calculate total weighted score
 		int totalScore = spellingScore + subVerbScore + verbTenseScore + 2*sentFormScore 
 				+ 2*coherentScore + 3*topicScore + 2*lengthScore;
 		
 		String finalGrade = "Unknown";
-		if(totalScore < 25)
+		if(totalScore < 37)
 			finalGrade = "Low";
-		else if(totalScore < 32)
+		else if(totalScore < 47)
 			finalGrade = "Medium";
 		else
 			finalGrade = "High";
@@ -454,7 +534,7 @@ public class AutoGrader
 		System.out.println("\t" + finalGrade);
 		
 		
-		System.err.println(e2);
+		//System.err.println(e2);
 		spellChecker.close();
 	}
 	

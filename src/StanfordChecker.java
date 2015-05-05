@@ -44,7 +44,7 @@ public class StanfordChecker {
 
 		//SentenceDetect(text);
 		
-		text = text.replace(".", ". ");
+		//text = text.replace(".", ". ");
 		
 		int countSingleRefer = 0;
 		int countMultipleRefer = 0;
@@ -100,7 +100,7 @@ public class StanfordChecker {
 		return document.get(CorefChainAnnotation.class);
 	}
 
-	public static void main(String[] args) {
+	public static void getScore() {
 
 		// Retrieve the names of the essays from the given directory
 		File folder = new File(inputPath);
@@ -128,7 +128,6 @@ public class StanfordChecker {
 				System.out.println("" + name);
 				generateScore(name, pipeline);
 				System.out.println("");
-				//generateScore(fileNames[3], pipeline);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
